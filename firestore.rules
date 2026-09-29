@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /respuestas_encuesta/{responseId} {
+      allow create: if request.resource.data.keys().hasOnly([
+        'edad', 'carrera', 'genero', 'situacion_laboral',
+        'dependencia_economica', 'tiene_dependientes', 'realiza_apuestas',
+        'frecuencia_apuestas', 'tipos_apuestas', 'motivos_apuestas',
+        'monto_mensual', 'origen_dinero', 'excedio_presupuesto',
+        'pidio_prestado', 'intento_reducir', 'mantuvo_reduccion',
+        'aspectos_afectados', 'publicidad_apuestas', 'legalidad_plataforma',
+        'motivos_no_apuesta', 'afectacion_cotidiana', 'consecuencias_negativas',
+        'puede_generar_adiccion', 'conoce_persona_adiccion',
+        'conocimiento_financiero', 'educacion_financiera_previa',
+        'interes_capacitacion', 'temas_capacitacion', 'conciencia_riesgos',
+        'fechaEnvio'
+      ])
+      && request.resource.data.keys().hasAll([
+        'edad', 'carrera', 'genero', 'situacion_laboral',
+        'dependencia_economica', 'tiene_dependientes', 'realiza_apuestas',
+        'publicidad_apuestas', 'legalidad_plataforma',
+        'conocimiento_financiero', 'educacion_financiera_previa',
+        'interes_capacitacion', 'temas_capacitacion',
+        'conciencia_riesgos', 'fechaEnvio'
+      ])
+      && request.resource.data.edad is int
+      && request.resource.data.edad >= 18
+      && request.resource.data.edad <= 100
+      && request.resource.data.carrera is string
+      && request.resource.data.genero is string
+      && request.resource.data.situacion_laboral is list
+      && request.resource.data.realiza_apuestas in [
+        'Sí, actualmente', 'Sí, pero actualmente no', 'No, nunca'
+      ]
+      && request.resource.data.publicidad_apuestas is string
+      && request.resource.data.legalidad_plataforma is string
+      && request.resource.data.educacion_financiera_previa is list
+      && request.resource.data.temas_capacitacion is list
+      && request.resource.data.interes_capacitacion in ['Sí', 'No', 'Tal vez']
+      && (request.resource.data.realiza_apuestas in ['Sí, actualmente', 'Sí, pero actualmente no']
+        ? request.resource.data.keys().hasAll([
+          'frecuencia_apuestas', 'tipos_apuestas', 'motivos_apuestas',
+          'monto_mensual', 'origen_dinero', 'excedio_presupuesto',
+          'pidio_prestado', 'intento_reducir', 'aspectos_afectados'
+        ])
+          && !request.resource.data.keys().hasAny([
+            'motivos_no_apuesta', 'afectacion_cotidiana',
+            'consecuencias_negativas', 'puede_generar_adiccion',
+            'conoce_persona_adiccion'
+          ])
+          && request.resource.data.frecuencia_apuestas is string
+          && request.resource.data.tipos_apuestas is list
+          && request.resource.data.motivos_apuestas is list
+          && request.resource.data.origen_dinero is list
+          && request.resource.data.excedio_presupuesto in ['Sí', 'No']
+          && request.resource.data.pidio_prestado in ['Sí', 'No', 'Prefiero no responder']
+          && request.resource.data.intento_reducir in ['Sí', 'No']
+          && request.resource.data.aspectos_afectados is list
+          && (request.resource.data.intento_reducir == 'Sí'
+            ? request.resource.data.keys().hasAll(['mantuvo_reduccion'])
+              && request.resource.data.mantuvo_reduccion in ['Sí', 'No', 'Parcialmente']
+            : !request.resource.data.keys().hasAny(['mantuvo_reduccion']))
+        : request.resource.data.keys().hasAll([
+          'motivos_no_apuesta', 'afectacion_cotidiana', 'consecuencias_negativas',
+          'puede_generar_adiccion', 'conoce_persona_adiccion'
+        ])
+          && !request.resource.data.keys().hasAny([
+            'frecuencia_apuestas', 'tipos_apuestas', 'motivos_apuestas',
+            'monto_mensual', 'origen_dinero', 'excedio_presupuesto',
+            'pidio_prestado', 'intento_reducir', 'mantuvo_reduccion',
+            'aspectos_afectados'
+          ])
+          && request.resource.data.motivos_no_apuesta is list
+          && request.resource.data.afectacion_cotidiana in ['Sí', 'No']
+          && request.resource.data.consecuencias_negativas in ['Sí', 'No']
+          && request.resource.data.puede_generar_adiccion in ['Sí', 'No']
+          && request.resource.data.conoce_persona_adiccion in ['Sí', 'No'])
+      && request.resource.data.conciencia_riesgos in ['Sí', 'No', 'No estoy seguro/a']
+      && request.resource.data.fechaEnvio == request.time;
+
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}

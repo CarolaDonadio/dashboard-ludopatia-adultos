@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /respuestas_encuesta/{document} {
+      // Permite lectura pública para escribir respuestas anónimas
+      allow create: if true;
+      // Solo administradores autenticados pueden leer o editar
+      allow read, update, delete: if request.auth != null;
+    }
+  }
+}

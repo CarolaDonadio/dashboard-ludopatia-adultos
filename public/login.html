@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#13211b">
+	<title>Acceso administrador | LudoStats</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/casino-theme.css">
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body class="login-page">
+	<header class="site-header">
+		<a class="brand" href="index.html" aria-label="LudoStats, inicio"><span class="brand-mark" aria-hidden="true">♠</span><span><strong>LUDO<span>STATS</span></strong><small>Investigación y análisis</small></span></a>
+		<a class="quiet-link" href="survey.html">Ir a la encuesta <span aria-hidden="true">↗</span></a>
+	</header>
+	<main class="login-shell">
+		<section class="login-intro"><p class="eyebrow">Área privada</p><h1>Los datos,<br><em>con perspectiva.</em></h1><p>Acceso para el equipo de investigación.</p><div class="login-rule"><span>01</span> Respuestas anónimas <span>02</span> Lectura agregada</div></section>
+		<section class="login-form-wrap">
+			<div class="login-form-heading"><span class="section-number">↗</span><div><p class="eyebrow">Administración</p><h2>Iniciar sesión</h2></div></div>
+			<div class="notice notice-warning" id="firebase-notice" hidden>Firebase aún no está configurado. Podés abrir la vista de demostración local; el acceso real se habilitará al completar la configuración.</div>
+			<div class="form-message" id="login-message" role="alert" hidden></div>
+			<form id="login-form" class="login-form">
+				<label for="email">Correo electrónico</label><input class="text-input" id="email" name="email" type="email" autocomplete="username" required>
+				<label for="password">Contraseña</label><input class="text-input" id="password" name="password" type="password" autocomplete="current-password" required>
+				<button class="button button-primary" id="login-submit" type="submit">Ingresar al dashboard <span aria-hidden="true">→</span></button>
+			</form>
+			<div class="login-alternative"><span>Exploración sin credenciales</span><a href="dashboard.html?demo=1">Abrir datos de demostración local ↗</a></div>
+		</section>
+	</main>
+	<footer class="site-footer"><span>LudoStats · Investigación académica</span><span>El acceso real requiere Firebase Authentication y reglas de Firestore.</span></footer>
+	<script type="module" src="js/auth.js"></script>
+</body>
+</html>

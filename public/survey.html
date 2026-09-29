@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#13211b">
+	<meta name="description" content="Encuesta anónima sobre hábitos de apuestas y educación financiera en adultos.">
+	<title>Encuesta | LudoStats</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/casino-theme.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/survey.css">
+</head>
+<body class="survey-page">
+	<header class="site-header">
+		<a class="brand" href="index.html" aria-label="LudoStats, inicio">
+			<span class="brand-mark" aria-hidden="true">♠</span>
+			<span><strong>LUDO<span>STATS</span></strong><small>Investigación y análisis</small></span>
+		</a>
+		<a class="quiet-link" href="login.html">Acceso administrador <span aria-hidden="true">↗</span></a>
+	</header>
+
+	<main class="survey-shell">
+		<section class="welcome-panel" id="welcome-panel">
+			<div class="welcome-copy">
+				<p class="eyebrow"><span class="status-dot"></span> Participación anónima · Mayores de 18 años</p>
+				<h1>Hábitos de apuestas,<br><em>decisiones financieras.</em></h1>
+				<p class="welcome-description">Una investigación académica sobre apuestas con dinero y educación financiera en personas adultas. No pedimos nombres ni datos de contacto.</p>
+				<div class="welcome-facts"><span>◷ 3 a 5 minutos</span><span>▤ 29 preguntas</span><span>⌁ Respuestas confidenciales</span></div>
+				<button class="button button-primary" id="start-survey" type="button">Comenzar encuesta <span aria-hidden="true">→</span></button>
+			</div>
+			<aside class="welcome-note"><span class="note-symbol" aria-hidden="true">✳</span><p>Tu participación es voluntaria. Podés cerrar la encuesta cuando quieras.</p><p class="small-note">Esta encuesta no realiza un diagnóstico clínico.</p></aside>
+		</section>
+
+		<section class="form-panel" id="form-panel" hidden>
+			<div class="form-heading">
+				<div><p class="eyebrow">Encuesta anónima</p><h1>Contanos tu experiencia</h1></div>
+				<button class="text-button" id="back-to-welcome" type="button">← Volver</button>
+			</div>
+			<div class="progress-row"><span id="progress-label">Sección 1 de 7</span><span id="progress-count">0 de 29</span></div>
+			<div class="progress-track" role="progressbar" aria-label="Progreso de la encuesta" aria-valuemin="0" aria-valuemax="29" aria-valuenow="0"><span id="progress-bar"></span></div>
+			<div id="form-message" class="form-message" role="alert" hidden></div>
+			<form id="survey-form" novalidate>
+				<div id="survey-sections"></div>
+				<div class="form-actions"><span>Los campos con <b>*</b> son obligatorios.</span><button class="button button-primary" id="submit-survey" type="submit">Enviar respuestas <span aria-hidden="true">→</span></button></div>
+			</form>
+		</section>
+	</main>
+
+	<dialog class="thanks-dialog" id="thanks-dialog" aria-labelledby="thanks-title">
+		<button class="dialog-close" id="close-thanks" type="button" aria-label="Cerrar">×</button>
+		<span class="thanks-mark" aria-hidden="true">✓</span>
+		<p class="eyebrow">Respuesta recibida</p>
+		<h2 id="thanks-title">Gracias por participar</h2>
+		<p>Tu aporte suma a esta investigación sobre apuestas y educación financiera.</p>
+		<button class="button button-primary" id="finish-thanks" type="button">Cerrar</button>
+	</dialog>
+	<footer class="site-footer"><span>LudoStats · Investigación académica</span><span>No reemplaza orientación profesional.</span></footer>
+	<script type="module" src="js/survey.js"></script>
+</body>
+</html>

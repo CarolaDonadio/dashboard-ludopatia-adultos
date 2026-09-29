@@ -1,0 +1,18 @@
+:root {
+  color-scheme: dark;
+  --bg: #121b17;
+  --surface: #19251e;
+  --surface-raised: #202c24;
+  --surface-soft: #243128;
+  --line: #344337;
+  --line-soft: rgba(198, 183, 132, .16);
+  --text: #f4f0e5;
+  --text-soft: #c4c6b9;
+  --muted: #98a397;
+  --gold: #d5b56a;
+  --gold-strong: #edcd7e;
+  --green: #71a889;
+  --red: #d4846e;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'DM Sans', 'Segoe UI', sans-serif;
+}

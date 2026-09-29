@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#13211b">
+	<title>Dashboard | LudoStats</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/casino-theme.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="dashboard-page">
+	<header class="site-header dashboard-header">
+		<a class="brand" href="index.html" aria-label="LudoStats, inicio"><span class="brand-mark" aria-hidden="true">♠</span><span><strong>LUDO<span>STATS</span></strong><small>Investigación y análisis</small></span></a>
+		<nav class="header-actions" aria-label="Navegación principal"><a class="quiet-link" href="survey.html">Encuesta ↗</a><button class="icon-button" id="logout-button" type="button" aria-label="Cerrar sesión" title="Cerrar sesión" hidden>↪</button></nav>
+	</header>
+	<main class="dashboard-shell">
+		<div class="dashboard-title-row"><div><p class="eyebrow">Panel de investigación</p><h1>Hábitos y bienestar financiero</h1><p class="dashboard-subtitle">Una lectura agregada de las respuestas recibidas.</p></div><div class="dashboard-meta"><span class="data-badge" id="data-badge">Conectando datos…</span><span id="updated-at" class="muted-text"></span></div></div>
+		<div class="notice notice-warning" id="demo-notice" hidden>Datos de demostración ficticios. No corresponden a respuestas reales ni deben usarse para conclusiones.</div>
+		<div class="notice notice-info" id="local-notice" hidden>Modo local: se muestran respuestas guardadas en este navegador. Para compartir datos entre dispositivos, configurá Firebase.</div>
+		<div class="notice notice-error" id="dashboard-error" role="alert" hidden></div>
+
+		<section class="kpi-grid" id="kpi-grid" aria-label="Indicadores principales"></section>
+
+		<section class="chart-grid" aria-label="Distribución de respuestas">
+			<article class="chart-panel chart-panel-wide"><div class="panel-heading"><div><p class="eyebrow">Panorama</p><h2>Relación con las apuestas</h2></div><span class="panel-index">01</span></div><div class="chart-box"><canvas id="gambling-chart" aria-label="Gráfico de anillo: relación con las apuestas"></canvas><div class="chart-empty" hidden>Sin datos disponibles</div></div></article>
+			<article class="chart-panel"><div class="panel-heading"><div><p class="eyebrow">Perfil</p><h2>Edades</h2></div><span class="panel-index">02</span></div><div class="chart-box"><canvas id="age-chart" aria-label="Gráfico de barras por edad"></canvas><div class="chart-empty" hidden>Sin datos disponibles</div></div></article>
+			<article class="chart-panel"><div class="panel-heading"><div><p class="eyebrow">Frecuencia</p><h2>Ritmo de apuestas</h2><p class="panel-note">Entre quienes apostaron alguna vez</p></div><span class="panel-index">03</span></div><div class="chart-box"><canvas id="frequency-chart" aria-label="Gráfico de barras por frecuencia"></canvas><div class="chart-empty" hidden>Sin datos disponibles</div></div></article>
+			<article class="chart-panel chart-panel-wide"><div class="panel-heading"><div><p class="eyebrow">Bienestar</p><h2>Ámbitos afectados</h2><p class="panel-note">Conteo de personas; respuesta múltiple</p></div><span class="panel-index">04</span></div><div class="chart-box"><canvas id="impact-chart" aria-label="Gráfico de barras de ámbitos afectados"></canvas><div class="chart-empty" hidden>Sin datos disponibles</div></div></article>
+			<article class="chart-panel chart-panel-wide"><div class="panel-heading"><div><p class="eyebrow">Aprendizaje</p><h2>Temas de interés</h2><p class="panel-note">Conteo de personas; respuesta múltiple</p></div><span class="panel-index">05</span></div><div class="chart-box"><canvas id="topics-chart" aria-label="Gráfico de barras de temas de educación financiera"></canvas><div class="chart-empty" hidden>Sin datos disponibles</div></div></article>
+			<article class="chart-panel"><div class="panel-heading"><div><p class="eyebrow">Conciencia</p><h2>Riesgos económicos</h2></div><span class="panel-index">06</span></div><div class="chart-box"><canvas id="awareness-chart" aria-label="Gráfico de anillo sobre conciencia de riesgos"></canvas><div class="chart-empty" hidden>Sin datos disponibles</div></div></article>
+		</section>
+
+		<section class="table-section"><div class="panel-heading table-heading"><div><p class="eyebrow">Detalle</p><h2>Distribución por monto mensual</h2><p class="panel-note">Solo quienes apostaron alguna vez; “prefiero no responder” se excluye del KPI de monto frecuente.</p></div><span class="panel-index">07</span></div>
+			<div class="table-wrap"><table><thead><tr><th scope="col">Monto destinado</th><th scope="col">Respuestas</th><th scope="col">Porcentaje del grupo</th></tr></thead><tbody id="spend-table"></tbody></table></div>
+			<div class="table-empty" id="spend-empty" hidden>No hay respuestas de monto para mostrar.</div>
+		</section>
+		<p class="method-note">Indicadores de deuda, exceso de presupuesto e impacto usan como base respuestas válidas de personas que apostaron alguna vez. Las opciones múltiples cuentan personas por opción; sus porcentajes pueden superar el 100% si se suman.</p>
+	</main>
+	<footer class="site-footer"><span>LudoStats · Investigación académica</span><span>Los resultados son descriptivos y no constituyen un diagnóstico clínico.</span></footer>
+	<script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

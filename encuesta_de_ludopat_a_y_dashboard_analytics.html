@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ludopatía & Educación Financiera - Encuesta y Dashboard</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js for Dashboard Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts: Playfair Display for luxury headers, Inter for crisp UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            casino: {
+              black: '#0a0b0e',
+              dark: '#12141a',
+              card: '#1a1d26',
+              border: '#2a2f3d',
+              gold: '#D4AF37',
+              goldHover: '#B59226',
+              burgundy: '#800020',
+              burgundyLight: '#a31536',
+              emerald: '#0f5257',
+              emeraldBright: '#10b981',
+              neonGold: '#f59e0b',
+              accent: '#C5A059'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0b0e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2a2f3d;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #D4AF37;
+    }
+
+    /* Casino Subtle Accent Gradient */
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #FFF1B0 0%, #D4AF37 50%, #9A7B1C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gold-border-glow {
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+    }
+
+    .burgundy-glass {
+      background: rgba(128, 0, 32, 0.25);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .card-glass {
+      background: rgba(26, 29, 38, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Form Custom Controls */
+    input[type="radio"], input[type="checkbox"] {
+      accent-color: #D4AF37;
+    }
+
+    /* Smooth Transition for conditional questions */
+    .fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-casino-black text-gray-200 font-sans min-h-screen flex flex-col antialiased selection:bg-casino-gold selection:text-black">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-casino-dark/90 backdrop-blur-md border-b border-casino-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo Branding -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('survey')">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-casino-burgundy to-casino-black border border-casino-gold/40 flex items-center justify-center shadow-lg">
+          <i class="fa-solid font-bold text-casino-gold text-lg">♠</i>
+        </div>
+        <div>
+          <span class="font-serif text-lg font-bold text-white tracking-wide block leading-none">LUDO<span class="text-casino-gold">STATS</span></span>
+          <span class="text-[10px] text-gray-400 tracking-wider uppercase">Investigación & Análisis</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links & Status -->
+      <nav class="flex items-center gap-2 sm:gap-4">
+        <button id="nav-survey-btn" onclick="switchTab('survey')" class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 text-casino-gold bg-casino-gold/10 border border-casino-gold/30">
+          <i class="fa-solid fa-clipboard-question"></i>
+          <span>Encuesta</span>
+        </button>
+
+        <button id="nav-login-btn" onclick="switchTab('login')" class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-casino-card border border-transparent transition-all duration-200 flex items-center gap-2">
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Admin</span>
+        </button>
+
+        <button id="nav-dashboard-btn" onclick="switchTab('dashboard')" class="hidden px-3 sm:px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-casino-card border border-transparent transition-all duration-200 flex items-center gap-2">
+          <i class="fa-solid fa-chart-line text-casino-gold"></i>
+          <span>Dashboard</span>
+        </button>
+
+        <button id="nav-logout-btn" onclick="handleLogout()" class="hidden px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-1">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden sm:inline">Salir</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- SECTION 1: SURVEY & WELCOME PAGE -->
+    <section id="view-survey" class="fade-in max-w-4xl mx-auto">
+      
+      <!-- Welcome Hero Banner -->
+      <div id="survey-welcome" class="card-glass rounded-2xl p-6 sm:p-10 mb-8 border border-casino-gold/30 relative overflow-hidden shadow-2xl">
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-casino-burgundy/30 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-10 -top-10 w-48 h-48 bg-casino-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-casino-gold/10 border border-casino-gold/30 text-casino-gold text-xs font-semibold mb-4">
+            <i class="fa-solid fa-shield-halved"></i> 100% Anónimo & Confidencial
+          </div>
+          <h1 class="font-serif text-2xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+            Estudio sobre <span class="gold-gradient-text">Hábitos de Apuestas</span> y Educación Financiera
+          </h1>
+          <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-6">
+            Esta encuesta tiene como objetivo recolectar datos estadísticos para comprender los patrones de apuestas con dinero en adultos y el nivel de conocimientos financieros. No recolectamos nombres ni datos identificatorios. Tu participación sincera contribuye a generar datos de valor para la prevención.
+          </p>
+          <div class="flex flex-wrap items-center gap-4 text-xs text-gray-400">
+            <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-casino-gold"></i> Duración estimada: 3-5 minutos</span>
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap text-casino-gold"></i> Adultos (+18 años)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Survey Form -->
+      <form id="survey-form" class="space-y-8" onsubmit="handleSurveySubmit(event)">
+        
+        <!-- SECTION 1: DATOS DEMOGRÁFICOS -->
+        <div class="card-glass rounded-2xl p-6 sm:p-8 space-y-6">
+          <div class="border-b border-casino-border pb-4 flex items-center justify-between">
+            <h2 class="font-serif text-xl font-bold text-casino-gold flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-casino-gold/20 text-casino-gold text-sm flex items-center justify-center font-sans font-semibold">1</span>
+              Datos Demográficos y Laborales
+            </h2>
+            <span class="text-xs text-gray-400">Paso 1 de 6</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Edad -->
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Qué edad tenés? <span class="text-casino-gold">*</span></label>
+              <input type="number" min="18" max="100" name="edad" required placeholder="Ej: 24" 
+                     class="w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-casino-gold transition-colors">
+            </div>
+
+            <!-- Género -->
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Con qué género te identificás? <span class="text-casino-gold">*</span></label>
+              <select name="genero" required class="w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold transition-colors">
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Carrera -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Qué carrera estás cursando? <span class="text-casino-gold">*</span></label>
+            <div class="space-y-2.5">
+              <select name="carrera" id="carrera-select" required onchange="toggleOtherInput(this, 'carrera-otra-container')" 
+                      class="w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold transition-colors">
+                <option value="" disabled selected>Selecciona tu carrera o programa</option>
+                <option value="Administración Financiera">Administración Financiera</option>
+                <option value="Base de Datos e Inteligencia Artificial">Base de Datos e Inteligencia Artificial</option>
+                <option value="Profesorado de Educación Inicial">Profesorado de Educación Inicial</option>
+                <option value="Profesorado de Inglés">Profesorado de Inglés</option>
+                <option value="Profesorado de Matemática">Profesorado de Matemática</option>
+                <option value="Profesorado en Lengua y Literatura">Profesorado en Lengua y Literatura</option>
+                <option value="Curso de Formación Básica de Inglés">Curso de Formación Básica de Inglés</option>
+                <option value="Enfermería">Enfermería</option>
+                <option value="Trabajo Social">Trabajo Social</option>
+                <option value="Seguridad e Higiene">Seguridad e Higiene</option>
+                <option value="Otra">Otra</option>
+              </select>
+              
+              <!-- Campo condicional Otra Carrera -->
+              <div id="carrera-otra-container" class="hidden fade-in">
+                <input type="text" id="carrera-otra-input" name="carrera_otra" placeholder="Especifica tu carrera o área..." 
+                       class="w-full bg-casino-dark/80 border border-casino-gold/50 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-casino-gold">
+              </div>
+            </div>
+          </div>
+
+          <!-- Situación Laboral (Múltiple) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Cuál es tu situación laboral actual? <span class="text-xs text-gray-400 font-normal">(Podés seleccionar más de una)</span></label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex items-center gap-3 p-3 rounded-xl bg-casino-dark/50 border border-casino-border hover:border-casino-border/80 cursor-pointer">
+                <input type="checkbox" name="situacion_laboral" value="Trabajo en relación de dependencia" class="w-4 h-4">
+                <span class="text-sm text-gray-300">Trabajo en relación de dependencia</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl bg-casino-dark/50 border border-casino-border hover:border-casino-border/80 cursor-pointer">
+                <input type="checkbox" name="situacion_laboral" value="Trabajo por cuenta propia" class="w-4 h-4">
+                <span class="text-sm text-gray-300">Trabajo por cuenta propia</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl bg-casino-dark/50 border border-casino-border hover:border-casino-border/80 cursor-pointer">
+                <input type="checkbox" name="situacion_laboral" value="Trabajo y estudio" class="w-4 h-4">
+                <span class="text-sm text-gray-300">Trabajo y estudio</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl bg-casino-dark/50 border border-casino-border hover:border-casino-border/80 cursor-pointer">
+                <input type="checkbox" name="situacion_laboral" value="No trabajo actualmente" class="w-4 h-4">
+                <span class="text-sm text-gray-300">No trabajo actualmente</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl bg-casino-dark/50 border border-casino-border hover:border-casino-border/80 cursor-pointer sm:col-span-2">
+                <input type="checkbox" name="situacion_laboral" value="Otra situación" id="chk-sit-otra" onchange="toggleCheckboxOtherInput(this, 'sit-otra-container')" class="w-4 h-4">
+                <span class="text-sm text-gray-300">Otra situación</span>
+              </label>
+            </div>
+            <div id="sit-otra-container" class="hidden mt-2 fade-in">
+              <input type="text" name="situacion_laboral_otra" placeholder="Escriba otra situación laboral..." class="w-full bg-casino-dark/80 border border-casino-gold/50 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-casino-gold">
+            </div>
+          </div>
+
+          <!-- Dependencias -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Dependés económicamente de otra persona?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="depende_economicamente" value="Sí" required> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="depende_economicamente" value="No"> No</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="depende_economicamente" value="Parcialmente"> Parcialmente</label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Hay alguna persona que dependa económicamente de vos?</label>
+              <div class="flex gap-6">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="dependientes_a_cargo" value="Sí" required> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="dependientes_a_cargo" value="No"> No</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: FILTRO PRINCIPAL DE APUESTAS -->
+        <div class="card-glass rounded-2xl p-6 sm:p-8 space-y-4 border-l-4 border-l-casino-gold">
+          <div class="border-b border-casino-border pb-3">
+            <h2 class="font-serif text-xl font-bold text-casino-gold flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-casino-gold/20 text-casino-gold text-sm flex items-center justify-center font-sans font-semibold">2</span>
+              Experiencia con Apuestas
+            </h2>
+          </div>
+
+          <div>
+            <label class="block text-base font-semibold text-white mb-3">¿Realizás o realizaste apuestas con dinero? <span class="text-casino-gold">*</span></label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label class="p-4 rounded-xl border border-casino-border bg-casino-dark/70 hover:border-casino-gold/50 cursor-pointer flex items-center gap-3 transition-all">
+                <input type="radio" name="realiza_apuestas" value="Sí, actualmente" required onchange="handleGamblingFilterChange(this.value)">
+                <span class="text-sm font-medium text-gray-200">Sí, actualmente</span>
+              </label>
+
+              <label class="p-4 rounded-xl border border-casino-border bg-casino-dark/70 hover:border-casino-gold/50 cursor-pointer flex items-center gap-3 transition-all">
+                <input type="radio" name="realiza_apuestas" value="Sí, pero actualmente no" onchange="handleGamblingFilterChange(this.value)">
+                <span class="text-sm font-medium text-gray-200">Sí, pero actualmente no</span>
+              </label>
+
+              <label class="p-4 rounded-xl border border-casino-border bg-casino-dark/70 hover:border-casino-gold/50 cursor-pointer flex items-center gap-3 transition-all">
+                <input type="radio" name="realiza_apuestas" value="No, nunca" onchange="handleGamblingFilterChange(this.value)">
+                <span class="text-sm font-medium text-gray-200">No, nunca</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: CONDICIONAL (SOLO SI RESPONDIÓ SÍ A APUESTAS) -->
+        <div id="section-gamblers" class="hidden fade-in card-glass rounded-2xl p-6 sm:p-8 space-y-6 border border-casino-burgundy/50">
+          <div class="border-b border-casino-border pb-4">
+            <h2 class="font-serif text-xl font-bold text-red-400 flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-casino-burgundy text-white text-sm flex items-center justify-center font-sans font-semibold">3</span>
+              Detalle de Hábitos de Apuesta
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">Sección visible únicamente para quienes realizan o realizaron apuestas.</p>
+          </div>
+
+          <!-- Frecuencia -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Con qué frecuencia realizás / realizabas apuestas?</label>
+            <select name="frecuencia_apuestas" class="gambler-required w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold">
+              <option value="" disabled selected>Selecciona la frecuencia</option>
+              <option value="Diariamente">Diariamente</option>
+              <option value="Varias veces por semana">Varias veces por semana</option>
+              <option value="Una vez por semana">Una vez por semana</option>
+              <option value="Algunas veces al mes">Algunas veces al mes</option>
+              <option value="Menos de una vez al mes">Menos de una vez al mes</option>
+            </select>
+          </div>
+
+          <!-- Tipo de Apuestas (Múltiple + Otro) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Qué tipo de apuestas realizás o realizaste? <span class="text-xs text-gray-400 font-normal">(Podés seleccionar más de una)</span></label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="tipo_apuestas" value="Casino online"> <span class="text-sm text-gray-300">Casino online</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="tipo_apuestas" value="Apuestas deportivas"> <span class="text-sm text-gray-300">Apuestas deportivas</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="tipo_apuestas" value="Casino presencial"> <span class="text-sm text-gray-300">Casino presencial</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="tipo_apuestas" value="Juegos de cartas"> <span class="text-sm text-gray-300">Juegos de cartas</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="tipo_apuestas" value="Bingo"> <span class="text-sm text-gray-300">Bingo</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="tipo_apuestas" value="Apuestas en carreras"> <span class="text-sm text-gray-300">Apuestas en carreras</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="tipo_apuestas" value="Juegos de azar"> <span class="text-sm text-gray-300">Juegos de azar</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer sm:col-span-2">
+                <input type="checkbox" name="tipo_apuestas" value="Otra" onchange="toggleCheckboxOtherInput(this, 'tipo-otra-container')">
+                <span class="text-sm text-gray-300">Otra</span>
+              </label>
+            </div>
+            <div id="tipo-otra-container" class="hidden mt-2 fade-in">
+              <input type="text" name="tipo_apuestas_otra" placeholder="Escriba otro tipo de apuesta..." class="w-full bg-casino-dark/80 border border-casino-gold/50 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-casino-gold">
+            </div>
+          </div>
+
+          <!-- Principal Motivo (Múltiple + Otro) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Cuál es el principal motivo por el que apostás o apostabas? <span class="text-xs text-gray-400 font-normal">(Podés seleccionar más de uno)</span></label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_apuestas" value="Entretenimiento/diversión"> <span class="text-sm text-gray-300">Entretenimiento/diversión</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_apuestas" value="Posibilidad de ganar dinero"> <span class="text-sm text-gray-300">Posibilidad de ganar dinero</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_apuestas" value="Influencia de amigos o conocidos"> <span class="text-sm text-gray-300">Influencia de amigos o conocidos</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_apuestas" value="Publicidad/redes sociales"> <span class="text-sm text-gray-300">Publicidad/redes sociales</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_apuestas" value="Curiosidad"> <span class="text-sm text-gray-300">Curiosidad</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_apuestas" value="Costumbre"> <span class="text-sm text-gray-300">Costumbre</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer sm:col-span-2">
+                <input type="checkbox" name="motivo_apuestas" value="Otro" onchange="toggleCheckboxOtherInput(this, 'motivo-otro-container')">
+                <span class="text-sm text-gray-300">Otro</span>
+              </label>
+            </div>
+            <div id="motivo-otro-container" class="hidden mt-2 fade-in">
+              <input type="text" name="motivo_apuestas_otro" placeholder="Especificar otro motivo..." class="w-full bg-casino-dark/80 border border-casino-gold/50 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-casino-gold">
+            </div>
+          </div>
+
+          <!-- Monto Mensual Estimado -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">Aproximadamente, ¿cuánto dinero destinás a apuestas en un mes?</label>
+            <select name="monto_mensual" class="gambler-required w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold">
+              <option value="" disabled selected>Selecciona un rango de dinero</option>
+              <option value="Menos de $5.000">Menos de $5.000</option>
+              <option value="$5.000-$10.000">$5.000 - $10.000</option>
+              <option value="$10.001-$25.000">$10.001 - $25.000</option>
+              <option value="$25.001-$50.000">$25.001 - $50.000</option>
+              <option value="$50.001-$100.000">$50.001 - $100.000</option>
+              <option value="Más de $100.000">Más de $100.000</option>
+              <option value="Prefiero no responder">Prefiero no responder</option>
+            </select>
+          </div>
+
+          <!-- Origen del Dinero (Múltiple + Otro) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿De dónde proviene principalmente el dinero que utilizás para apostar? <span class="text-xs text-gray-400 font-normal">(Podés seleccionar más de uno)</span></label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="origen_dinero" value="Ingresos de mi trabajo"> <span class="text-sm text-gray-300">Ingresos de mi trabajo</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="origen_dinero" value="Dinero que recibo de mi familia"> <span class="text-sm text-gray-300">Dinero que recibo de mi familia</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="origen_dinero" value="Ahorros"> <span class="text-sm text-gray-300">Ahorros</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="origen_dinero" value="Dinero prestado"> <span class="text-sm text-gray-300">Dinero prestado</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="origen_dinero" value="Crédito/tarjeta"> <span class="text-sm text-gray-300">Crédito / tarjeta</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="origen_dinero" value="Otro" onchange="toggleCheckboxOtherInput(this, 'origen-otro-container')"> <span class="text-sm text-gray-300">Otro</span></label>
+            </div>
+            <div id="origen-otro-container" class="hidden mt-2 fade-in">
+              <input type="text" name="origen_dinero_otro" placeholder="Especificar otro origen..." class="w-full bg-casino-dark/80 border border-casino-gold/50 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-casino-gold">
+            </div>
+          </div>
+
+          <!-- Preguntas de Comportamiento de Riesgo -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Alguna vez apostaste más dinero del que inicialmente tenías pensado gastar?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="aposto_mas_pensado" value="Sí" class="gambler-required"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="aposto_mas_pensado" value="No"> No</label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Alguna vez pediste dinero prestado o utilizaste crédito para apostar?</label>
+              <div class="flex gap-4 flex-wrap">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="pidio_prestado" value="Sí" class="gambler-required"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="pidio_prestado" value="No"> No</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="pidio_prestado" value="Prefiero no responder"> Prefiero no responder</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Alguna vez intentaste dejar de apostar o reducir la cantidad de apuestas?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="intento_reducir" value="Sí" class="gambler-required" onchange="toggleReducirLogro(this.value)"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="intento_reducir" value="No" onchange="toggleReducirLogro(this.value)"> No</label>
+              </div>
+            </div>
+
+            <div id="container-logro-mantener" class="opacity-50 pointer-events-none transition-all">
+              <label class="block text-sm font-medium text-gray-200 mb-2">Si respondiste que sí, ¿lograste mantener esa decisión?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="logro_mantener" value="Sí"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="logro_mantener" value="No"> No</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="logro_mantener" value="Parcialmente"> Parcialmente</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aspectos Afectados -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Las apuestas alguna vez afectaron alguno de estos aspectos de tu vida? <span class="text-xs text-gray-400 font-normal">(Podés seleccionar más de uno)</span></label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Economía personal"> <span class="text-xs sm:text-sm text-gray-300">Economía personal</span></label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Estudios"> <span class="text-xs sm:text-sm text-gray-300">Estudios</span></label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Trabajo"> <span class="text-xs sm:text-sm text-gray-300">Trabajo</span></label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Relaciones familiares"> <span class="text-xs sm:text-sm text-gray-300">Relaciones familiares</span></label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Relaciones con amigos"> <span class="text-xs sm:text-sm text-gray-300">Relaciones con amigos</span></label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Tiempo libre"> <span class="text-xs sm:text-sm text-gray-300">Tiempo libre</span></label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Estado de ánimo"> <span class="text-xs sm:text-sm text-gray-300">Estado de ánimo</span></label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="aspectos_afectados" value="Ninguno"> <span class="text-xs sm:text-sm text-gray-300">Ninguno</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: PUBLICIDAD Y LEGALIDAD (TODOS) -->
+        <div class="card-glass rounded-2xl p-6 sm:p-8 space-y-6">
+          <div class="border-b border-casino-border pb-4">
+            <h2 class="font-serif text-xl font-bold text-casino-gold flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-casino-gold/20 text-casino-gold text-sm flex items-center justify-center font-sans font-semibold">4</span>
+              Publicidad y Regulaciones
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Con qué frecuencia ves publicidad relacionada con apuestas? <span class="text-casino-gold">*</span></label>
+              <select name="frecuencia_publicidad" required class="w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold">
+                <option value="" disabled selected>Selecciona frecuencia</option>
+                <option value="Nunca">Nunca</option>
+                <option value="Rara vez">Rara vez</option>
+                <option value="Algunas veces">Algunas veces</option>
+                <option value="Frecuentemente">Frecuentemente</option>
+                <option value="Muy frecuentemente">Muy frecuentemente</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Sabés cómo identificar si una plataforma de apuestas está habilitada legalmente? <span class="text-casino-gold">*</span></label>
+              <select name="plataforma_legal" required class="w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold">
+                <option value="" disabled selected>Selecciona respuesta</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+                <option value="No estoy seguro/a">No estoy seguro/a</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 5: CONDICIONAL (SOLO PARA QUIENES NO APUESTAN) -->
+        <div id="section-non-gamblers" class="hidden fade-in card-glass rounded-2xl p-6 sm:p-8 space-y-6 border border-emerald-500/30">
+          <div class="border-b border-casino-border pb-4">
+            <h2 class="font-serif text-xl font-bold text-emerald-400 flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-emerald-800 text-white text-sm flex items-center justify-center font-sans font-semibold">5</span>
+              Percepción de Personas que No Apuestan
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">Sección visible para quienes respondieron "No, nunca".</p>
+          </div>
+
+          <!-- Por qué no apostás -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Por qué no apostás? <span class="text-xs text-gray-400 font-normal">(Podés seleccionar más de una)</span></label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_no_apuesta" value="Falta de conocimiento"> <span class="text-sm text-gray-300">Falta de conocimiento</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_no_apuesta" value="Miedo"> <span class="text-sm text-gray-300">Miedo</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_no_apuesta" value="Falta de dinero"> <span class="text-sm text-gray-300">Falta de dinero</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="motivo_no_apuesta" value="Otros" onchange="toggleCheckboxOtherInput(this, 'no-apuesta-otro-container')"> <span class="text-sm text-gray-300">Otros</span></label>
+            </div>
+            <div id="no-apuesta-otro-container" class="hidden mt-2 fade-in">
+              <input type="text" name="motivo_no_apuesta_otro" placeholder="Escriba otro motivo por el que no apuesta..." class="w-full bg-casino-dark/80 border border-casino-gold/50 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-casino-gold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Pensás que las apuestas pueden afectar tu vida cotidiana?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="afecta_vida_cotidiana" value="Sí" class="non-gambler-required"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="afecta_vida_cotidiana" value="No"> No</label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Creés que las apuestas tienen más consecuencias negativas que positivas?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="consecuencias_negativas" value="Sí" class="non-gambler-required"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="consecuencias_negativas" value="No"> No</label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Considerás que las apuestas pueden generar adicción?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="genera_adiccion" value="Sí" class="non-gambler-required"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="genera_adiccion" value="No"> No</label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Conocés a alguien que tenga una adicción a las apuestas?</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="conoce_adicto" value="Sí" class="non-gambler-required"> Sí</label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="conoce_adicto" value="No"> No</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 6: EDUCACIÓN FINANCIERA (TODOS) -->
+        <div class="card-glass rounded-2xl p-6 sm:p-8 space-y-6">
+          <div class="border-b border-casino-border pb-4">
+            <h2 class="font-serif text-xl font-bold text-casino-gold flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-casino-gold/20 text-casino-gold text-sm flex items-center justify-center font-sans font-semibold">6</span>
+              Educación Financiera y Cierre
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Sabés qué significa "educación financiera"? <span class="text-casino-gold">*</span></label>
+              <select name="sabe_educacion_financiera" required class="w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold">
+                <option value="" disabled selected>Selecciona respuesta</option>
+                <option value="Sí, y podría explicarlo">Sí, y podría explicarlo</option>
+                <option value="Tengo una idea general">Tengo una idea general</option>
+                <option value="No">No</option>
+                <option value="Nunca había escuchado el término">Nunca había escuchado el término</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-200 mb-2">¿Recibiste educación financiera anteriormente? <span class="text-casino-gold">*</span></label>
+              <select name="recibio_ed_financiera" required class="w-full bg-casino-dark border border-casino-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-casino-gold">
+                <option value="" disabled selected>Selecciona opción</option>
+                <option value="Sí, en la escuela">Sí, en la escuela</option>
+                <option value="Sí, en un curso/taller">Sí, en un curso/taller</option>
+                <option value="Sí, en mi carrera">Sí, en mi carrera</option>
+                <option value="Sí, a través de mi familia">Sí, a través de mi familia</option>
+                <option value="Sí, por mi cuenta">Sí, por mi cuenta</option>
+                <option value="No">No</option>
+                <option value="No recuerdo">No recuerdo</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Te gustaría recibir más información o capacitación sobre educación financiera? <span class="text-casino-gold">*</span></label>
+            <div class="flex gap-6">
+              <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="interes_capacitacion" value="Sí" required> Sí</label>
+              <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="interes_capacitacion" value="No"> No</label>
+              <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="interes_capacitacion" value="Tal vez"> Tal vez</label>
+            </div>
+          </div>
+
+          <!-- Temas de Interés (Múltiple + Otro) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-2">¿Sobre qué temas te gustaría aprender? <span class="text-xs text-gray-400 font-normal">(Podés seleccionar más de uno)</span></label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Cómo organizar un presupuesto"> <span class="text-sm text-gray-300">Organizar un presupuesto</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Cómo ahorrar"> <span class="text-sm text-gray-300">Cómo ahorrar</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Cómo utilizar una tarjeta de crédito"> <span class="text-sm text-gray-300">Uso de tarjeta de crédito</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Préstamos y endeudamiento"> <span class="text-sm text-gray-300">Préstamos y endeudamiento</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Inversiones"> <span class="text-sm text-gray-300">Inversiones</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Intereses"> <span class="text-sm text-gray-300">Intereses</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Inflación"> <span class="text-sm text-gray-300">Inflación</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Riesgos de las apuestas"> <span class="text-sm text-gray-300">Riesgos de las apuestas</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer"><input type="checkbox" name="temas_interes" value="Probabilidad y juegos de azar"> <span class="text-sm text-gray-300">Probabilidad y azar</span></label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-casino-dark/50 border border-casino-border cursor-pointer sm:col-span-2 md:col-span-3">
+                <input type="checkbox" name="temas_interes" value="Otro" onchange="toggleCheckboxOtherInput(this, 'temas-otro-container')">
+                <span class="text-sm text-gray-300">Otro tema</span>
+              </label>
+            </div>
+            <div id="temas-otro-container" class="hidden mt-2 fade-in">
+              <input type="text" name="temas_interes_otro" placeholder="Especificar otro tema de interés..." class="w-full bg-casino-dark/80 border border-casino-gold/50 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-casino-gold">
+            </div>
+          </div>
+
+          <!-- Pregunta Final -->
+          <div class="pt-4 border-t border-casino-border/60">
+            <label class="block text-base font-semibold text-white mb-3">
+              Después de responder esta encuesta, ¿considerás que tenés una mayor conciencia sobre los riesgos económicos asociados a las apuestas? <span class="text-casino-gold">*</span>
+            </label>
+            <div class="flex flex-wrap gap-4">
+              <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="mayor_conciencia" value="Sí" required> Sí</label>
+              <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="mayor_conciencia" value="No"> No</label>
+              <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300"><input type="radio" name="mayor_conciencia" value="No estoy seguro/a"> No estoy seguro/a</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 text-center">
+          <button type="submit" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-casino-gold via-yellow-500 to-casino-gold text-casino-black font-bold text-lg rounded-2xl shadow-xl hover:shadow-casino-gold/20 hover:scale-[1.01] active:scale-[0.99] transition-all border border-yellow-200/50">
+            <i class="fa-solid fa-paper-plane mr-2"></i> Enviar Encuesta Anónima
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- SECTION 2: ADMIN LOGIN VIEW -->
+    <section id="view-login" class="hidden fade-in max-w-md mx-auto my-12">
+      <div class="card-glass rounded-2xl p-8 border border-casino-gold/30 gold-border-glow shadow-2xl relative">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 rounded-2xl bg-casino-burgundy/40 border border-casino-gold/40 flex items-center justify-center mx-auto mb-4 text-casino-gold text-2xl shadow-inner">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h2 class="font-serif text-2xl font-bold text-white">Acceso Administrador</h2>
+          <p class="text-xs text-gray-400 mt-1">Ingresá tus credenciales para visualizar el Dashboard</p>
+        </div>
+
+        <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-5">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Correo Electrónico</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-envelope text-sm"></i></span>
+              <input type="email" id="login-email" required value="admin@ludostats.org" 
+                     class="w-full bg-casino-dark border border-casino-border rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-casino-gold transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">Contraseña</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-key text-sm"></i></span>
+              <input type="password" id="login-password" required value="admin123" 
+                     class="w-full bg-casino-dark border border-casino-border rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-casino-gold transition-colors">
+            </div>
+          </div>
+
+          <div id="login-error" class="hidden text-xs text-red-400 bg-red-950/40 p-3 rounded-lg border border-red-500/30 text-center">
+            Credenciales no válidas.
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-casino-gold to-casino-goldHover text-casino-black font-bold rounded-xl shadow-lg hover:brightness-110 active:scale-[0.99] transition-all">
+            Ingresar al Panel
+          </button>
+          
+          <p class="text-center text-xs text-gray-500 mt-3">
+            Modo demostración habilitado (click en Ingresar)
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECTION 3: DASHBOARD ADMINISTRATIVO -->
+    <section id="view-dashboard" class="hidden fade-in space-y-8">
+      
+      <!-- Top Action Toolbar -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-casino-card/60 p-4 rounded-2xl border border-casino-border">
+        <div>
+          <h1 class="font-serif text-2xl font-bold text-white flex items-center gap-2">
+            <span>Panel de Métricas y Métricas de Ludopatía</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-sans font-normal border border-emerald-500/30">En vivo</span>
+          </h1>
+          <p class="text-xs text-gray-400">Análisis estadístico consolidado de encuestas registradas</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="seedMockData()" class="px-3.5 py-2 rounded-xl bg-casino-dark border border-casino-border hover:border-casino-gold/50 text-xs text-gray-300 hover:text-white transition-all flex items-center gap-2">
+            <i class="fa-solid fa-database text-casino-gold"></i> Cargar Datos de Prueba
+          </button>
+          <button onclick="exportDataJSON()" class="px-3.5 py-2 rounded-xl bg-casino-dark border border-casino-border hover:border-casino-gold/50 text-xs text-gray-300 hover:text-white transition-all flex items-center gap-2">
+            <i class="fa-solid fa-file-code text-casino-gold"></i> Exportar JSON
+          </button>
+          <button onclick="exportDataCSV()" class="px-3.5 py-2 rounded-xl bg-casino-gold text-casino-black font-semibold text-xs rounded-xl shadow hover:bg-casino-goldHover transition-all flex items-center gap-2">
+            <i class="fa-solid fa-file-csv"></i> Exportar CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- 7 KPI STAT CARDS -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
+        <!-- KPI 1 -->
+        <div class="card-glass rounded-xl p-4 border border-casino-border relative overflow-hidden">
+          <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Total Respuestas</span>
+          <div id="kpi-total" class="text-2xl font-bold text-white font-serif">0</div>
+          <span class="text-[10px] text-gray-500">Muestra consolidada</span>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="card-glass rounded-xl p-4 border border-casino-border relative overflow-hidden">
+          <span class="text-[10px] font-semibold text-casino-gold uppercase tracking-wider block mb-1">% Apuesta Actual</span>
+          <div id="kpi-active-gamblers" class="text-2xl font-bold text-casino-gold font-serif">0%</div>
+          <span class="text-[10px] text-gray-500">Jugadores activos</span>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="card-glass rounded-xl p-4 border border-casino-border relative overflow-hidden">
+          <span class="text-[10px] font-semibold text-red-400 uppercase tracking-wider block mb-1">% Endeudamiento</span>
+          <div id="kpi-debt-rate" class="text-2xl font-bold text-red-400 font-serif">0%</div>
+          <span class="text-[10px] text-gray-500">Pidieron prestado/crédito</span>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="card-glass rounded-xl p-4 border border-casino-border relative overflow-hidden">
+          <span class="text-[10px] font-semibold text-amber-400 uppercase tracking-wider block mb-1">Gasto Predominante</span>
+          <div id="kpi-avg-spend" class="text-sm font-bold text-amber-300 font-sans truncate mt-1">-</div>
+          <span class="text-[10px] text-gray-500">Moda mensual</span>
+        </div>
+
+        <!-- KPI 5 -->
+        <div class="card-glass rounded-xl p-4 border border-casino-border relative overflow-hidden">
+          <span class="text-[10px] font-semibold text-purple-400 uppercase tracking-wider block mb-1">% Afectados</span>
+          <div id="kpi-affected" class="text-2xl font-bold text-purple-300 font-serif">0%</div>
+          <span class="text-[10px] text-gray-500">En salud/economía</span>
+        </div>
+
+        <!-- KPI 6 -->
+        <div class="card-glass rounded-xl p-4 border border-casino-border relative overflow-hidden">
+          <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider block mb-1">Interés Ed. Finan.</span>
+          <div id="kpi-ed-interest" class="text-2xl font-bold text-emerald-400 font-serif">0%</div>
+          <span class="text-[10px] text-gray-500">Quieren capacitación</span>
+        </div>
+
+        <!-- KPI 7 -->
+        <div class="card-glass rounded-xl p-4 border border-casino-border relative overflow-hidden col-span-2 sm:col-span-1">
+          <span class="text-[10px] font-semibold text-blue-400 uppercase tracking-wider block mb-1">Mayor Conciencia</span>
+          <div id="kpi-awareness" class="text-2xl font-bold text-blue-300 font-serif">0%</div>
+          <span class="text-[10px] text-gray-500">Post-encuesta</span>
+        </div>
+      </div>
+
+      <!-- CHARTS GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Chart 1: Donut (Estado de Apuestas) -->
+        <div class="card-glass rounded-2xl p-5 border border-casino-border flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-serif text-base font-bold text-white">Distribución de Apuestas</h3>
+            <p class="text-xs text-gray-400">¿Realizan o realizaron apuestas con dinero?</p>
+          </div>
+          <div class="relative h-64 w-full flex items-center justify-center">
+            <canvas id="chart-gambling-status"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Bar (Tipos de Apuesta) -->
+        <div class="card-glass rounded-2xl p-5 border border-casino-border flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-serif text-base font-bold text-white">Modalidades de Apuesta</h3>
+            <p class="text-xs text-gray-400">Tipos de juegos preferidos por los encuestados</p>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="chart-gambling-types"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Horizontal Bar (Aspectos Afectados) -->
+        <div class="card-glass rounded-2xl p-5 border border-casino-border flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-serif text-base font-bold text-white">Aspectos de la Vida Afectados</h3>
+            <p class="text-xs text-gray-400">Impacto negativo reportado por jugadores</p>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="chart-affected-aspects"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 4: Radar/Pie (Motivos para Apostar) -->
+        <div class="card-glass rounded-2xl p-5 border border-casino-border flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-serif text-base font-bold text-white">Motivaciones Principales</h3>
+            <p class="text-xs text-gray-400">Razones por las que deciden apostar</p>
+          </div>
+          <div class="relative h-64 w-full flex items-center justify-center">
+            <canvas id="chart-motives"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 5: Pie (Interés Capacitación Financiera) -->
+        <div class="card-glass rounded-2xl p-5 border border-casino-border flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-serif text-base font-bold text-white">Interés en Ed. Financiera</h3>
+            <p class="text-xs text-gray-400">Disposición a recibir talleres/información</p>
+          </div>
+          <div class="relative h-64 w-full flex items-center justify-center">
+            <canvas id="chart-financial-interest"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 6: Bar (Temas de Interés Financiero) -->
+        <div class="card-glass rounded-2xl p-5 border border-casino-border flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-serif text-base font-bold text-white">Temas Financieros de Interés</h3>
+            <p class="text-xs text-gray-400">Tópicos más demandados para capacitación</p>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="chart-topics-interest"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- DATA TABLE WITH SEARCH & FILTERS -->
+      <div class="card-glass rounded-2xl p-6 border border-casino-border space-y-4">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h3 class="font-serif text-lg font-bold text-white">Registro Detallado de Encuestas</h3>
+            <p class="text-xs text-gray-400">Filtrado dinámico de respuestas registradas</p>
+          </div>
+
+          <!-- Filters Bar -->
+          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <!-- Search -->
+            <div class="relative flex-1 sm:w-48">
+              <input type="text" id="table-search" oninput="filterTableData()" placeholder="Buscar carrera..." class="w-full bg-casino-dark border border-casino-border rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-casino-gold">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-500"></i>
+            </div>
+
+            <!-- Filter Carrera -->
+            <select id="table-filter-carrera" onchange="filterTableData()" class="bg-casino-dark border border-casino-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-casino-gold">
+              <option value="ALL">Todas las carreras</option>
+            </select>
+
+            <!-- Filter Estado Apuestas -->
+            <select id="table-filter-apuestas" onchange="filterTableData()" class="bg-casino-dark border border-casino-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-casino-gold">
+              <option value="ALL">Todos los estados</option>
+              <option value="Sí, actualmente">Apuesta actualmente</option>
+              <option value="Sí, pero actualmente no">Apostaba antes</option>
+              <option value="No, nunca">Nunca apostó</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table Responsive Container -->
+        <div class="overflow-x-auto rounded-xl border border-casino-border">
+          <table class="w-full text-left text-xs text-gray-300">
+            <thead class="bg-casino-dark/80 text-casino-gold font-semibold border-b border-casino-border uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3">Fecha</th>
+                <th class="px-4 py-3">Edad</th>
+                <th class="px-4 py-3">Género</th>
+                <th class="px-4 py-3">Carrera</th>
+                <th class="px-4 py-3">¿Aposta?</th>
+                <th class="px-4 py-3">Gasto Estimado</th>
+                <th class="px-4 py-3">Riesgo / Deuda</th>
+                <th class="px-4 py-3">Ed. Finan.</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-casino-border/50 bg-casino-dark/30">
+              <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
+        </div>
+        <div id="table-empty-msg" class="hidden text-center py-8 text-gray-500 text-xs">
+          No se encontraron encuestas con los filtros seleccionados.
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ELEGANT THANK YOU MODAL POPUP -->
+  <div id="modal-thanks" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="card-glass rounded-3xl p-8 max-w-md w-full border border-casino-gold/40 gold-border-glow text-center space-y-6 relative animate-bounce-short">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-casino-gold to-yellow-200 text-casino-black flex items-center justify-center mx-auto text-3xl shadow-xl">
+        <i class="fa-solid fa-check font-bold"></i>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="font-serif text-2xl font-bold text-white">¡Gracias por participar!</h3>
+        <p class="text-sm text-gray-300 leading-relaxed">
+          Tus respuestas han sido registradas de forma totalmente <span class="text-casino-gold font-semibold">anónima y segura</span>.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-casino-dark/80 border border-casino-border text-xs text-gray-400 text-left space-y-1">
+        <p class="font-semibold text-gray-300"><i class="fa-solid fa-circle-info text-casino-gold mr-1"></i> Línea de Ayuda y Prevención:</p>
+        <p>Si sentís que las apuestas afectan tu vida o la de alguien cercano, comunicate gratis al 0800-444-4000 (Jugadores Anónimos) o acudí a tu centro de salud más cercano.</p>
+      </div>
+
+      <button onclick="closeThanksModal()" class="w-full py-3 bg-casino-gold hover:bg-casino-goldHover text-casino-black font-bold rounded-xl shadow-lg transition-all">
+        Aceptar y Finalizar
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Global App Configuration
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ludopatia-survey-app';
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+
+    // Firebase Initialization Guard
+    try {
+      if (typeof __firebase_config !== 'undefined') {
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // Authenticate silently
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          signInWithCustomToken(auth, __initial_auth_token).catch(() => signInAnonymously(auth));
+        } else {
+          signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          currentUser = user;
+          if (user && db) {
+            setupFirestoreListener();
+          }
+        });
+      }
+    } catch (e) {
+      console.warn("Firebase not loaded, utilizing local reactive state:", e);
+    }
+
+    // App State
+    window.surveyData = [];
+    window.isAdminLoggedIn = false;
+    window.chartInstances = {};
+
+    // Listen to Realtime Firestore updates
+    function setupFirestoreListener() {
+      if (!db || !appId) return;
+      const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
+      onSnapshot(colRef, (snapshot) => {
+        const docs = [];
+        snapshot.forEach(doc => {
+          docs.push({ id: doc.id, ...doc.data() });
+        });
+        if (docs.length > 0) {
+          window.surveyData = docs;
+          if (window.isAdminLoggedIn) {
+            renderDashboard();
+          }
+        }
+      }, (error) => {
+        console.error("Firestore error listener:", error);
+      });
+    }
+
+    // Save survey response
+    window.saveSurveyToFirestore = async function(surveyRecord) {
+      if (db && currentUser) {
+        try {
+          const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
+          await addDoc(colRef, surveyRecord);
+        } catch (e) {
+          console.error("Error adding doc to Firestore:", e);
+        }
+      }
+      // Always store locally as fallback
+      window.surveyData.unshift(surveyRecord);
+    }
+  </script>
+
+  <script>
+    // Tab Navigation Logic
+    function switchTab(tabName) {
+      const views = ['survey', 'login', 'dashboard'];
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+      });
+
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+
+      // Update Nav Buttons Styles
+      document.getElementById('nav-survey-btn').className = tabName === 'survey' 
+        ? "px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all text-casino-gold bg-casino-gold/10 border border-casino-gold/30"
+        : "px-3 sm:px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-casino-card border border-transparent transition-all";
+
+      document.getElementById('nav-login-btn').className = tabName === 'login' 
+        ? "px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all text-casino-gold bg-casino-gold/10 border border-casino-gold/30"
+        : "px-3 sm:px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-casino-card border border-transparent transition-all";
+
+      if (tabName === 'dashboard') {
+        if (!window.isAdminLoggedIn) {
+          switchTab('login');
+          return;
+        }
+        renderDashboard();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Toggle conditionally specified inputs for select dropdowns
+    function toggleOtherInput(selectElem, targetId) {
+      const target = document.getElementById(targetId);
+      if (selectElem.value === 'Otra' || selectElem.value === 'Otros') {
+        target.classList.remove('hidden');
+        target.querySelector('input').setAttribute('required', 'true');
+      } else {
+        target.classList.add('hidden');
+        target.querySelector('input').removeAttribute('required');
+      }
+    }
+
+    // Toggle conditionally specified inputs for checkbox options
+    function toggleCheckboxOtherInput(checkboxElem, targetId) {
+      const target = document.getElementById(targetId);
+      if (checkboxElem.checked) {
+        target.classList.remove('hidden');
+      } else {
+        target.classList.add('hidden');
+      }
+    }
+
+    // Main Gambling Filter Toggle Behavior (Section 2 -> Section 3/5)
+    function handleGamblingFilterChange(val) {
+      const secGamblers = document.getElementById('section-gamblers');
+      const secNonGamblers = document.getElementById('section-non-gamblers');
+      const gamblerInputs = secGamblers.querySelectorAll('.gambler-required');
+      const nonGamblerInputs = secNonGamblers.querySelectorAll('.non-gambler-required');
+
+      if (val === 'Sí, actualmente' || val === 'Sí, pero actualmente no') {
+        secGamblers.classList.remove('hidden');
+        secNonGamblers.classList.add('hidden');
+        gamblerInputs.forEach(i => i.setAttribute('required', 'true'));
+        nonGamblerInputs.forEach(i => i.removeAttribute('required'));
+      } else if (val === 'No, nunca') {
+        secGamblers.classList.add('hidden');
+        secNonGamblers.classList.remove('hidden');
+        gamblerInputs.forEach(i => i.removeAttribute('required'));
+        nonGamblerInputs.forEach(i => i.setAttribute('required', 'true'));
+      }
+    }
+
+    // Toggle Sub-question for lograste mantener
+    function toggleReducirLogro(val) {
+      const container = document.getElementById('container-logro-mantener');
+      if (val === 'Sí') {
+        container.classList.remove('opacity-50', 'pointer-events-none');
+        container.querySelectorAll('input').forEach(i => i.setAttribute('required', 'true'));
+      } else {
+        container.classList.add('opacity-50', 'pointer-events-none');
+        container.querySelectorAll('input').forEach(i => {
+          i.removeAttribute('required');
+          i.checked = false;
+        });
+      }
+    }
+
+    // Survey Form Handler
+    async function handleSurveySubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      // Collect Multi-select Array Values
+      const getMultiple = (name, otherName) => {
+        const values = formData.getAll(name);
+        if (otherName && formData.get(otherName)) {
+          const idx = values.indexOf('Otra') !== -1 ? values.indexOf('Otra') : values.indexOf('Otros');
+          if (idx !== -1) values[idx] = `Otro: ${formData.get(otherName)}`;
+          else values.push(`Otro: ${formData.get(otherName)}`);
+        }
+        return values;
+      };
+
+      let carreraVal = formData.get('carrera');
+      if (carreraVal === 'Otra' && formData.get('carrera_otra')) {
+        carreraVal = `Otra: ${formData.get('carrera_otra')}`;
+      }
+
+      const surveyRecord = {
+        timestamp: new Date().toISOString(),
+        edad: parseInt(formData.get('edad')) || 0,
+        genero: formData.get('genero'),
+        carrera: carreraVal,
+        situacion_laboral: getMultiple('situacion_laboral', 'situacion_laboral_otra'),
+        depende_economicamente: formData.get('depende_economicamente'),
+        dependientes_a_cargo: formData.get('dependientes_a_cargo'),
+        
+        // Gambling Section
+        realiza_apuestas: formData.get('realiza_apuestas'),
+        frecuencia_apuestas: formData.get('frecuencia_apuestas') || 'N/A',
+        tipo_apuestas: getMultiple('tipo_apuestas', 'tipo_apuestas_otra'),
+        motivo_apuestas: getMultiple('motivo_apuestas', 'motivo_apuestas_otro'),
+        monto_mensual: formData.get('monto_mensual') || 'N/A',
+        origen_dinero: getMultiple('origen_dinero', 'origen_dinero_otro'),
+        aposto_mas_pensado: formData.get('aposto_mas_pensado') || 'N/A',
+        pidio_prestado: formData.get('pidio_prestado') || 'N/A',
+        intento_reducir: formData.get('intento_reducir') || 'N/A',
+        logro_mantener: formData.get('logro_mantener') || 'N/A',
+        aspectos_afectados: formData.getAll('aspectos_afectados'),
+
+        // Publicidad & Legal
+        frecuencia_publicidad: formData.get('frecuencia_publicidad'),
+        plataforma_legal: formData.get('plataforma_legal'),
+
+        // Non-gamblers perception
+        motivo_no_apuesta: getMultiple('motivo_no_apuesta', 'motivo_no_apuesta_otro'),
+        afecta_vida_cotidiana: formData.get('afecta_vida_cotidiana') || 'N/A',
+        consecuencias_negativas: formData.get('consecuencias_negativas') || 'N/A',
+        genera_adiccion: formData.get('genera_adiccion') || 'N/A',
+        conoce_adicto: formData.get('conoce_adicto') || 'N/A',
+
+        // Financial Education
+        sabe_educacion_financiera: formData.get('sabe_educacion_financiera'),
+        recibio_ed_financiera: formData.get('recibio_ed_financiera'),
+        interes_capacitacion: formData.get('interes_capacitacion'),
+        temas_interes: getMultiple('temas_interes', 'temas_interes_otro'),
+        mayor_conciencia: formData.get('mayor_conciencia')
+      };
+
+      // Save record
+      if (window.saveSurveyToFirestore) {
+        await window.saveSurveyToFirestore(surveyRecord);
+      } else {
+        window.surveyData.unshift(surveyRecord);
+      }
+
+      // Reset form & show elegant modal
+      form.reset();
+      document.getElementById('section-gamblers').classList.add('hidden');
+      document.getElementById('section-non-gamblers').classList.add('hidden');
+      document.getElementById('modal-thanks').classList.remove('hidden');
+    }
+
+    function closeThanksModal() {
+      document.getElementById('modal-thanks').classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Admin Auth Logic
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-password').value;
+
+      if (email && pass) {
+        window.isAdminLoggedIn = true;
+        document.getElementById('nav-login-btn').classList.add('hidden');
+        document.getElementById('nav-dashboard-btn').classList.remove('hidden');
+        document.getElementById('nav-logout-btn').classList.remove('hidden');
+        switchTab('dashboard');
+      } else {
+        document.getElementById('login-error').classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      window.isAdminLoggedIn = false;
+      document.getElementById('nav-login-btn').classList.remove('hidden');
+      document.getElementById('nav-dashboard-btn').classList.add('hidden');
+      document.getElementById('nav-logout-btn').classList.add('hidden');
+      switchTab('survey');
+    }
+  </script>
+
+  <script>
+    // Populate Initial Mock Data if empty for demo presentation
+    function ensureDataAvailable() {
+      if (!window.surveyData || window.surveyData.length === 0) {
+        seedMockData(false);
+      }
+    }
+
+    function seedMockData(renderImmediately = true) {
+      const mockList = [];
+      const carreras = [
+        "Administración Financiera", "Base de Datos e Inteligencia Artificial", 
+        "Profesorado de Matemática", "Enfermería", "Trabajo Social", "Seguridad e Higiene"
+      ];
+      const generos = ["Femenino", "Masculino", "Otro"];
+      const estados = ["Sí, actualmente", "Sí, pero actualmente no", "No, nunca"];
+      const montos = ["Menos de $5.000", "$5.000-$10.000", "$10.001-$25.000", "$25.001-$50.000", "Más de $100.000"];
+
+      for (let i = 0; i < 35; i++) {
+        const est = estados[Math.floor(Math.random() * estados.length)];
+        const isGambler = est !== "No, nunca";
+        
+        mockList.push({
+          timestamp: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
+          edad: Math.floor(Math.random() * 25) + 18,
+          genero: generos[Math.floor(Math.random() * generos.length)],
+          carrera: carreras[Math.floor(Math.random() * carreras.length)],
+          situacion_laboral: ["Trabajo en relación de dependencia", "Trabajo y estudio"],
+          depende_economicamente: Math.random() > 0.5 ? "Sí" : "No",
+          dependientes_a_cargo: "No",
+          realiza_apuestas: est,
+          frecuencia_apuestas: isGambler ? (Math.random() > 0.5 ? "Varias veces por semana" : "Algunas veces al mes") : "N/A",
+          tipo_apuestas: isGambler ? (Math.random() > 0.5 ? ["Casino online", "Apuestas deportivas"] : ["Bingo", "Juegos de azar"]) : [],
+          motivo_apuestas: isGambler ? ["Posibilidad de ganar dinero", "Entretenimiento/diversión"] : [],
+          monto_mensual: isGambler ? montos[Math.floor(Math.random() * montos.length)] : "N/A",
+          origen_dinero: isGambler ? ["Ingresos de mi trabajo", "Ahorros"] : [],
+          aposto_mas_pensado: isGambler ? (Math.random() > 0.4 ? "Sí" : "No") : "N/A",
+          pidio_prestado: isGambler ? (Math.random() > 0.6 ? "Sí" : "No") : "N/A",
+          intento_reducir: isGambler ? "Sí" : "N/A",
+          logro_mantener: isGambler ? "Parcialmente" : "N/A",
+          aspectos_afectados: isGambler ? (Math.random() > 0.5 ? ["Economía personal", "Estado de ánimo"] : ["Ninguno"]) : [],
+          frecuencia_publicidad: "Frecuentemente",
+          plataforma_legal: Math.random() > 0.5 ? "No" : "No estoy seguro/a",
+          motivo_no_apuesta: !isGambler ? ["Miedo", "Falta de dinero"] : [],
+          sabe_educacion_financiera: "Tengo una idea general",
+          recibio_ed_financiera: "Sí, en la escuela",
+          interes_capacitacion: Math.random() > 0.3 ? "Sí" : "Tal vez",
+          temas_interes: ["Cómo organizar un presupuesto", "Inversiones", "Riesgos de las apuestas"],
+          mayor_conciencia: "Sí"
+        });
+      }
+
+      window.surveyData = mockList;
+      if (renderImmediately && window.isAdminLoggedIn) {
+        renderDashboard();
+      }
+    }
+
+    // Render All KPI Cards, Dynamic Charts and Table
+    function renderDashboard() {
+      ensureDataAvailable();
+      const data = window.surveyData;
+      const total = data.length;
+
+      // KPI Computations
+      const activeGamblersCount = data.filter(d => d.realiza_apuestas === "Sí, actualmente").length;
+      const debtCount = data.filter(d => d.pidio_prestado === "Sí" || d.origen_dinero?.includes("Dinero prestado") || d.origen_dinero?.includes("Crédito/tarjeta")).length;
+      const affectedCount = data.filter(d => d.aspectos_afectados && d.aspectos_afectados.length > 0 && !d.aspectos_afectados.includes("Ninguno")).length;
+      const interestedEdCount = data.filter(d => d.interes_capacitacion === "Sí").length;
+      const awarenessCount = data.filter(d => d.mayor_conciencia === "Sí").length;
+
+      // Mode Spend
+      const spendMap = {};
+      data.forEach(d => {
+        if (d.monto_mensual && d.monto_mensual !== "N/A" && d.monto_mensual !== "Prefiero no responder") {
+          spendMap[d.monto_mensual] = (spendMap[d.monto_mensual] || 0) + 1;
+        }
+      });
+      let modeSpend = "-";
+      let maxSpendCnt = 0;
+      Object.entries(spendMap).forEach(([k, v]) => {
+        if (v > maxSpendCnt) { maxSpendCnt = v; modeSpend = k; }
+      });
+
+      // Update KPI Elements
+      document.getElementById('kpi-total').textContent = total;
+      document.getElementById('kpi-active-gamblers').textContent = total ? Math.round((activeGamblersCount / total) * 100) + "%" : "0%";
+      document.getElementById('kpi-debt-rate').textContent = total ? Math.round((debtCount / total) * 100) + "%" : "0%";
+      document.getElementById('kpi-avg-spend').textContent = modeSpend;
+      document.getElementById('kpi-affected').textContent = total ? Math.round((affectedCount / total) * 100) + "%" : "0%";
+      document.getElementById('kpi-ed-interest').textContent = total ? Math.round((interestedEdCount / total) * 100) + "%" : "0%";
+      document.getElementById('kpi-awareness').textContent = total ? Math.round((awarenessCount / total) * 100) + "%" : "0%";
+
+      // Render Charts
+      renderCharts(data);
+
+      // Populate Filter Options & Table
+      populateFilterOptions(data);
+      filterTableData();
+    }
+
+    // Helper to destroy and rebuild Chart.js instances cleanly
+    function buildChart(canvasId, type, config) {
+      if (window.chartInstances[canvasId]) {
+        window.chartInstances[canvasId].destroy();
+      }
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      window.chartInstances[canvasId] = new Chart(ctx, { type, ...config });
+    }
+
+    function renderCharts(data) {
+      Chart.defaults.color = '#9ca3af';
+      Chart.defaults.font.family = 'Inter';
+
+      // 1. Donut: Estado de Apuestas
+      const statusCounts = { "Sí, actualmente": 0, "Sí, pero actualmente no": 0, "No, nunca": 0 };
+      data.forEach(d => { if (statusCounts[d.realiza_apuestas] !== undefined) statusCounts[d.realiza_apuestas]++; });
+
+      buildChart('chart-gambling-status', 'doughnut', {
+        data: {
+          labels: Object.keys(statusCounts),
+          datasets: [{
+            data: Object.values(statusCounts),
+            backgroundColor: ['#D4AF37', '#800020', '#0f5257'],
+            borderWidth: 2,
+            borderColor: '#12141a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+        }
+      });
+
+      // 2. Bar: Tipos de Apuesta
+      const typeCounts = {};
+      data.forEach(d => {
+        if (Array.isArray(d.tipo_apuestas)) {
+          d.tipo_apuestas.forEach(t => {
+            const key = t.startsWith("Otro:") ? "Otra" : t;
+            typeCounts[key] = (typeCounts[key] || 0) + 1;
+          });
+        }
+      });
+
+      buildChart('chart-gambling-types', 'bar', {
+        data: {
+          labels: Object.keys(typeCounts),
+          datasets: [{
+            label: 'Respuestas',
+            data: Object.values(typeCounts),
+            backgroundColor: 'rgba(212, 175, 55, 0.7)',
+            borderColor: '#D4AF37',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+
+      // 3. Horizontal Bar: Aspectos Afectados
+      const aspectCounts = {};
+      data.forEach(d => {
+        if (Array.isArray(d.aspectos_afectados)) {
+          d.aspectos_afectados.forEach(a => {
+            if (a !== "Ninguno") aspectCounts[a] = (aspectCounts[a] || 0) + 1;
+          });
+        }
+      });
+
+      buildChart('chart-affected-aspects', 'bar', {
+        data: {
+          labels: Object.keys(aspectCounts),
+          datasets: [{
+            label: 'Personas Afectadas',
+            data: Object.values(aspectCounts),
+            backgroundColor: 'rgba(128, 0, 32, 0.7)',
+            borderColor: '#a31536',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+
+      // 4. Motivos para Apostar (Pie)
+      const motiveCounts = {};
+      data.forEach(d => {
+        if (Array.isArray(d.motivo_apuestas)) {
+          d.motivo_apuestas.forEach(m => {
+            const key = m.startsWith("Otro:") ? "Otro" : m;
+            motiveCounts[key] = (motiveCounts[key] || 0) + 1;
+          });
+        }
+      });
+
+      buildChart('chart-motives', 'pie', {
+        data: {
+          labels: Object.keys(motiveCounts),
+          datasets: [{
+            data: Object.values(motiveCounts),
+            backgroundColor: ['#D4AF37', '#f59e0b', '#0f5257', '#800020', '#6b7280', '#3b82f6'],
+            borderWidth: 2,
+            borderColor: '#12141a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+        }
+      });
+
+      // 5. Interés en Educación Financiera (Pie)
+      const edCounts = { "Sí": 0, "No": 0, "Tal vez": 0 };
+      data.forEach(d => { if (d.interes_capacitacion && edCounts[d.interes_capacitacion] !== undefined) edCounts[d.interes_capacitacion]++; });
+
+      buildChart('chart-financial-interest', 'doughnut', {
+        data: {
+          labels: Object.keys(edCounts),
+          datasets: [{
+            data: Object.values(edCounts),
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+            borderWidth: 2,
+            borderColor: '#12141a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+        }
+      });
+
+      // 6. Bar: Temas de Interés
+      const topicCounts = {};
+      data.forEach(d => {
+        if (Array.isArray(d.temas_interes)) {
+          d.temas_interes.forEach(t => {
+            const key = t.startsWith("Otro:") ? "Otro" : t;
+            topicCounts[key] = (topicCounts[key] || 0) + 1;
+          });
+        }
+      });
+
+      buildChart('chart-topics-interest', 'bar', {
+        data: {
+          labels: Object.keys(topicCounts),
+          datasets: [{
+            label: 'Interesados',
+            data: Object.values(topicCounts),
+            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+            borderColor: '#10b981',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    }
+
+    // Populate Carrera Dropdown Filter
+    function populateFilterOptions(data) {
+      const carreraSelect = document.getElementById('table-filter-carrera');
+      const currentVal = carreraSelect.value;
+      const carreras = new Set();
+      data.forEach(d => { if (d.carrera) carreras.add(d.carrera); });
+
+      carreraSelect.innerHTML = '<option value="ALL">Todas las carreras</option>';
+      carreras.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        carreraSelect.appendChild(opt);
+      });
+      carreraSelect.value = currentVal;
+    }
+
+    // Filter Table
+    function filterTableData() {
+      const search = document.getElementById('table-search').value.toLowerCase();
+      const carreraFilter = document.getElementById('table-filter-carrera').value;
+      const apuestasFilter = document.getElementById('table-filter-apuestas').value;
+
+      const filtered = window.surveyData.filter(d => {
+        const matchSearch = d.carrera ? d.carrera.toLowerCase().includes(search) : true;
+        const matchCarrera = carreraFilter === 'ALL' || d.carrera === carreraFilter;
+        const matchApuestas = apuestasFilter === 'ALL' || d.realiza_apuestas === apuestasFilter;
+        return matchSearch && matchCarrera && matchApuestas;
+      });
+
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        document.getElementById('table-empty-msg').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('table-empty-msg').classList.add('hidden');
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-casino-card/50 transition-colors";
+
+        const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleDateString('es-AR') : 'N/A';
+        const isGambler = item.realiza_apuestas !== "No, nunca";
+        const hasRisk = item.pidio_prestado === "Sí" || item.aposto_mas_pensado === "Sí";
+
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-gray-400">${dateStr}</td>
+          <td class="px-4 py-3 font-semibold text-white">${item.edad || '-'}</td>
+          <td class="px-4 py-3 text-gray-300">${item.genero || '-'}</td>
+          <td class="px-4 py-3 text-gray-300 max-w-xs truncate">${item.carrera || '-'}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+              item.realiza_apuestas === "Sí, actualmente" ? "bg-casino-gold/20 text-casino-gold border border-casino-gold/40" :
+              item.realiza_apuestas === "Sí, pero actualmente no" ? "bg-purple-900/30 text-purple-300 border border-purple-500/30" :
+              "bg-emerald-950/40 text-emerald-400 border border-emerald-500/30"
+            }">
+              ${item.realiza_apuestas || '-'}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-gray-300">${item.monto_mensual || '-'}</td>
+          <td class="px-4 py-3">
+            ${hasRisk 
+              ? '<span class="text-red-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Alto</span>' 
+              : '<span class="text-gray-500">Normal</span>'}
+          </td>
+          <td class="px-4 py-3 text-gray-300">${item.interes_capacitacion || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Export Helpers
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.surveyData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `ludostats_encuestas_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function exportDataCSV() {
+      if (!window.surveyData || window.surveyData.length === 0) return;
+      const headers = Object.keys(window.surveyData[0]).join(",");
+      const rows = window.surveyData.map(obj => {
+        return Object.values(obj).map(val => {
+          if (Array.isArray(val)) return `"${val.join('; ')}"`;
+          if (typeof val === 'string') return `"${val.replace(/"/g, '""')}"`;
+          return val;
+        }).join(",");
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `ludostats_encuestas_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+  </script>
+
+</body>
+</html>

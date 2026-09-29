@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "routes": [
+    { "src": "/", "dest": "/public/index.html" },
+    { "src": "/encuesta", "dest": "/public/survey.html" },
+    { "src": "/login", "dest": "/public/login.html" },
+    { "src": "/dashboard", "dest": "/public/dashboard.html" }
+  ]
+}
