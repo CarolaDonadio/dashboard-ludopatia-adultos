@@ -72,6 +72,12 @@ export function calculateMetrics(input) {
   );
   const validOverspend = experienced.filter(record => ['Sí', 'No'].includes(record.excedio_presupuesto));
   const validAwareness = records.filter(record => ['Sí', 'No', 'No estoy seguro/a'].includes(record.conciencia_riesgos));
+  const neverBetPerceptionFields = [
+    ['Afectación cotidiana', 'afectacion_cotidiana'],
+    ['Más consecuencias negativas', 'consecuencias_negativas'],
+    ['Puede generar adicción', 'puede_generar_adiccion'],
+    ['Conoce a alguien afectado', 'conoce_persona_adiccion']
+  ];
 
   return {
     total,
@@ -86,12 +92,25 @@ export function calculateMetrics(input) {
     gamblingStates: countSingleAnswers(records, 'realiza_apuestas'),
     frequency: countSingleAnswers(records, 'frecuencia_apuestas', hasGamblingExperience),
     betTypes: countAnswers(records, 'tipos_apuestas', hasGamblingExperience),
+    bettingMotives: countAnswers(records, 'motivos_apuestas', hasGamblingExperience),
+    fundingSources: countAnswers(records, 'origen_dinero', hasGamblingExperience),
+    reductionAttempts: countSingleAnswers(records, 'intento_reducir', hasGamblingExperience),
+    reductionOutcomes: countSingleAnswers(records, 'mantuvo_reduccion', record => hasGamblingExperience(record) && record.intento_reducir === 'Sí'),
     impacts: countAnswers(records, 'aspectos_afectados', hasGamblingExperience),
     financialEducation: countSingleAnswers(records, 'conocimiento_financiero'),
+    financialEducationHistory: countAnswers(records, 'educacion_financiera_previa'),
     trainingTopics: countAnswers(records, 'temas_capacitacion'),
     ages: ageDistribution(records),
     awareness: countSingleAnswers(records, 'conciencia_riesgos'),
+    advertising: countSingleAnswers(records, 'publicidad_apuestas'),
     legalKnowledge: countSingleAnswers(records, 'legalidad_plataforma'),
+    neverBetReasons: countAnswers(records, 'motivos_no_apuesta', record => record.realiza_apuestas === 'No, nunca'),
+    neverBetPerceptions: neverBetPerceptionFields.map(([label, field]) => {
+      const answers = countSingleAnswers(neverBet, field);
+      const validAnswers = answers.reduce((sum, [, count]) => sum + count, 0);
+      const yesAnswers = answers.find(([answer]) => answer === 'Sí')?.[1] || 0;
+      return [label, percentage(yesAnswers, validAnswers)];
+    }),
     denominators: {
       total,
       experienced: experienced.length,

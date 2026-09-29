@@ -10,8 +10,11 @@ function makeDemoRecords() {
 	const amounts = ['Menos de $5.000', '$5.000 - $10.000', '$10.001 - $25.000', '$25.001 - $50.000', '$50.001 - $100.000', 'Más de $100.000', 'Prefiero no responder'];
 	const ages = [19, 22, 24, 27, 31, 36, 42, 51, 58, 66, 23, 29];
 	const types = ['Casino online', 'Apuestas deportivas', 'Casino presencial', 'Juegos de cartas', 'Bingo', 'Apuestas en carreras', 'Juegos de azar'];
+	const motives = ['Entretenimiento/diversión', 'Posibilidad de ganar dinero', 'Influencia de amigos o conocidos', 'Publicidad/redes sociales', 'Curiosidad', 'Costumbre', 'Otro'];
+	const fundingSources = ['Ingresos de mi trabajo', 'Dinero que recibo de mi familia', 'Ahorros', 'Dinero prestado', 'Crédito/tarjeta'];
 	const impacts = ['Economía personal', 'Estado de ánimo', 'Estudios', 'Relaciones familiares', 'Trabajo', 'Tiempo libre'];
 	const topics = ['Cómo organizar un presupuesto', 'Cómo ahorrar', 'Riesgos de las apuestas', 'Cómo utilizar una tarjeta de crédito', 'Préstamos y endeudamiento', 'Probabilidad y juegos de azar'];
+	const educationSources = ['Sí, en la escuela', 'Sí, en un curso/taller', 'Sí, en mi carrera', 'Sí, a través de mi familia', 'Sí, por mi cuenta', 'No', 'No recuerdo'];
 	return Array.from({ length: 84 }, (_, index) => {
 		const state = gambling[index % gambling.length];
 		const experienced = state !== 'No, nunca';
@@ -20,13 +23,25 @@ function makeDemoRecords() {
 			realiza_apuestas: state,
 			frecuencia_apuestas: experienced ? ['Diariamente', 'Varias veces por semana', 'Una vez por semana', 'Algunas veces al mes', 'Menos de una vez al mes'][index % 5] : undefined,
 			tipos_apuestas: experienced ? [types[index % types.length], types[(index + 2) % types.length]] : undefined,
+			motivos_apuestas: experienced ? [motives[index % motives.length]] : undefined,
+			origen_dinero: experienced ? [fundingSources[index % fundingSources.length]] : undefined,
 			monto_mensual: experienced ? amounts[index % amounts.length] : undefined,
 			excedio_presupuesto: experienced ? (index % 3 ? 'No' : 'Sí') : undefined,
 			pidio_prestado: experienced ? (index % 4 ? 'No' : 'Sí') : undefined,
+			intento_reducir: experienced ? (index % 4 ? 'No' : 'Sí') : undefined,
+			mantuvo_reduccion: experienced && index % 4 === 0 ? ['Sí', 'No', 'Parcialmente'][Math.floor(index / 4) % 3] : undefined,
 			aspectos_afectados: experienced ? (index % 5 ? [impacts[index % impacts.length], impacts[(index + 1) % impacts.length]] : ['Ninguno']) : undefined,
 			interes_capacitacion: ['Sí', 'Sí', 'Tal vez', 'No'][index % 4],
 			temas_capacitacion: [topics[index % topics.length], topics[(index + 2) % topics.length]],
 			conocimiento_financiero: ['Sí, y podría explicarlo', 'Tengo una idea general', 'No', 'Nunca había escuchado el término'][index % 4],
+			educacion_financiera_previa: [educationSources[index % educationSources.length]],
+			publicidad_apuestas: ['Nunca', 'Rara vez', 'Algunas veces', 'Frecuentemente', 'Muy frecuentemente'][index % 5],
+			legalidad_plataforma: ['Sí', 'No', 'No estoy seguro/a'][index % 3],
+			motivos_no_apuesta: !experienced ? [['Falta de conocimiento', 'Miedo', 'Falta de dinero', 'Otros'][index % 4]] : undefined,
+			afectacion_cotidiana: !experienced ? (index % 2 ? 'Sí' : 'No') : undefined,
+			consecuencias_negativas: !experienced ? (index % 3 ? 'Sí' : 'No') : undefined,
+			puede_generar_adiccion: !experienced ? (index % 4 ? 'Sí' : 'No') : undefined,
+			conoce_persona_adiccion: !experienced ? (index % 2 ? 'No' : 'Sí') : undefined,
 			conciencia_riesgos: ['Sí', 'No', 'No estoy seguro/a'][index % 3],
 			fechaEnvio: new Date(Date.UTC(2025, 0, 1 + index)).toISOString()
 		};
@@ -55,17 +70,17 @@ function renderKpis(metrics) {
 		<article class="kpi-item"><span class="kpi-index">0${index + 1}</span><p>${item.label}</p><strong>${item.value}</strong><span class="kpi-note">${item.note}</span></article>`).join('');
 }
 
-function chartOptions({ horizontal = false, stacked = false } = {}) {
+function chartOptions({ horizontal = false, stacked = false, tickSuffix = '' } = {}) {
 	return {
 		responsive: true,
 		maintainAspectRatio: false,
 		indexAxis: horizontal ? 'y' : 'x',
 		plugins: {
 			legend: { display: false },
-			tooltip: { backgroundColor: '#18221c', titleColor: '#f7f1df', bodyColor: '#d0d0c4', padding: 12, displayColors: false }
+			tooltip: { backgroundColor: '#18221c', titleColor: '#f7f1df', bodyColor: '#d0d0c4', padding: 12, displayColors: false, callbacks: { label: context => `${context.formattedValue}${tickSuffix}` } }
 		},
 		scales: {
-			x: { beginAtZero: true, stacked, grid: { color: 'rgba(64, 80, 68, .42)' }, ticks: { color: '#a0aa9f', precision: 0 } },
+			x: { beginAtZero: true, stacked, max: tickSuffix ? 100 : undefined, grid: { color: 'rgba(64, 80, 68, .42)' }, ticks: { color: '#a0aa9f', precision: 0, callback: value => `${value}${tickSuffix}` } },
 			y: { beginAtZero: true, stacked, grid: { display: false }, ticks: { color: '#d0d0c4', autoSkip: false } }
 		}
 	};
@@ -115,6 +130,18 @@ async function render(records, Chart) {
 	drawChart(Chart, 'impact-chart', { labels: impactRows.map(item => item[0]), values: impactRows.map(item => item[1]) }, 'bar', { horizontal: true });
 	drawChart(Chart, 'topics-chart', { labels: metrics.trainingTopics.slice(0, 8).map(item => item[0]), values: metrics.trainingTopics.slice(0, 8).map(item => item[1]) }, 'bar', { horizontal: true });
 	drawChart(Chart, 'awareness-chart', { labels: metrics.awareness.map(item => item[0]), values: metrics.awareness.map(item => item[1]) }, 'doughnut');
+	drawChart(Chart, 'bet-types-chart', { labels: metrics.betTypes.map(item => item[0]), values: metrics.betTypes.map(item => item[1]) }, 'bar', { horizontal: true });
+	drawChart(Chart, 'betting-motives-chart', { labels: metrics.bettingMotives.map(item => item[0]), values: metrics.bettingMotives.map(item => item[1]) }, 'bar', { horizontal: true });
+	drawChart(Chart, 'funding-sources-chart', { labels: metrics.fundingSources.map(item => item[0]), values: metrics.fundingSources.map(item => item[1]) }, 'bar', { horizontal: true });
+	drawChart(Chart, 'reduction-chart', { labels: metrics.reductionAttempts.map(item => item[0]), values: metrics.reductionAttempts.map(item => item[1]) }, 'doughnut');
+	drawChart(Chart, 'reduction-success-chart', { labels: metrics.reductionOutcomes.map(item => item[0]), values: metrics.reductionOutcomes.map(item => item[1]) }, 'doughnut');
+	drawChart(Chart, 'financial-knowledge-chart', { labels: metrics.financialEducation.map(item => item[0]), values: metrics.financialEducation.map(item => item[1]) }, 'doughnut');
+	drawChart(Chart, 'education-history-chart', { labels: metrics.financialEducationHistory.map(item => item[0]), values: metrics.financialEducationHistory.map(item => item[1]) }, 'bar', { horizontal: true });
+	drawChart(Chart, 'advertising-chart', { labels: metrics.advertising.map(item => item[0]), values: metrics.advertising.map(item => item[1]) }, 'bar', { horizontal: true });
+	drawChart(Chart, 'legal-knowledge-chart', { labels: metrics.legalKnowledge.map(item => item[0]), values: metrics.legalKnowledge.map(item => item[1]) }, 'doughnut');
+	drawChart(Chart, 'never-bet-reasons-chart', { labels: metrics.neverBetReasons.map(item => item[0]), values: metrics.neverBetReasons.map(item => item[1]) }, 'bar', { horizontal: true });
+	const perceptionRows = metrics.neverBetPerceptions.filter(([, value]) => value !== null);
+	drawChart(Chart, 'never-bet-perception-chart', { labels: perceptionRows.map(item => item[0]), values: perceptionRows.map(item => item[1]) }, 'bar', { horizontal: true, tickSuffix: '%' });
 	renderTable(records, metrics);
 	document.querySelector('#updated-at').textContent = records.length ? `${formatNumber(records.length)} registros` : 'Aún no hay respuestas';
 }
