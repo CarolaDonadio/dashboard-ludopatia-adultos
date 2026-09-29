@@ -3,12 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
       return request.auth != null
-        && exists(/databases/$(database)/documents/administradores/$(request.auth.uid));
-    }
-
-    match /administradores/{adminUid} {
-      allow get: if request.auth != null && request.auth.uid == adminUid;
-      allow list, create, update, delete: if false;
+        && request.auth.uid == 'vb7gbc6k9ZSDOWCiYl4XJ1Q7w8j1';
     }
 
     match /respuestas_encuesta/{responseId} {

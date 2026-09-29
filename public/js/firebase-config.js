@@ -107,21 +107,11 @@ export async function observeAdmin(callback) {
     callback(null);
     return () => {};
   }
-  const [{ db, auth }, { onAuthStateChanged }, { doc, getDoc }] = await Promise.all([
+  const [{ auth }, { onAuthStateChanged }] = await Promise.all([
     getFirebaseServices(),
-    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'),
-    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js')
+    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js')
   ]);
-  return onAuthStateChanged(auth, async user => {
-    if (!user) {
-      callback(null);
-      return;
-    }
-    try {
-      const adminDocument = await getDoc(doc(db, 'administradores', user.uid));
-      callback(adminDocument.exists() ? user : null);
-    } catch {
-      callback(null);
-    }
+  return onAuthStateChanged(auth, user => {
+    callback(user?.uid === 'vb7gbc6k9ZSDOWCiYl4XJ1Q7w8j1' ? user : null);
   });
 }
