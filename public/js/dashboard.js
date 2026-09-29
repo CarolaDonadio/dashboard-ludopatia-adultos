@@ -1,7 +1,7 @@
 import { calculateMetrics, percentage } from './analytics.js';
 import { getSurveyResponses, isFirebaseConfigured, isFirebasePartiallyConfigured, observeAdmin, readLocalResponses, signOutAdmin } from './firebase-config.js';
 
-const colors = ['#c49a48', '#418575', '#b95a48', '#6c9ab0', '#a9815a', '#81a966', '#d0b879', '#887c68'];
+const colors = ['#d9ae4d', '#d95650', '#4d9b70', '#e5d9b7', '#c77a47', '#75b5a0', '#aeb7ad', '#9b7b50'];
 const demoMode = new URLSearchParams(location.search).get('demo') === '1';
 const chartInstances = [];
 
@@ -62,11 +62,11 @@ function chartOptions({ horizontal = false, stacked = false } = {}) {
 		indexAxis: horizontal ? 'y' : 'x',
 		plugins: {
 			legend: { display: false },
-			tooltip: { backgroundColor: '#17221d', titleColor: '#f7f4ec', bodyColor: '#c8c5b9', padding: 12, displayColors: false }
+			tooltip: { backgroundColor: '#18221c', titleColor: '#f7f1df', bodyColor: '#d0d0c4', padding: 12, displayColors: false }
 		},
 		scales: {
-			x: { beginAtZero: true, stacked, grid: { color: 'rgba(57, 73, 62, .42)' }, ticks: { color: '#9aa79c', precision: 0 } },
-			y: { beginAtZero: true, stacked, grid: { display: false }, ticks: { color: '#c6ccc4', autoSkip: false } }
+			x: { beginAtZero: true, stacked, grid: { color: 'rgba(64, 80, 68, .42)' }, ticks: { color: '#a0aa9f', precision: 0 } },
+			y: { beginAtZero: true, stacked, grid: { display: false }, ticks: { color: '#d0d0c4', autoSkip: false } }
 		}
 	};
 }
@@ -81,12 +81,12 @@ function drawChart(Chart, id, data, type, options = {}) {
 	const isDoughnut = type === 'doughnut';
 	chartInstances.push(new Chart(canvas, {
 		type,
-		data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: isDoughnut ? colors : colors[0], borderColor: isDoughnut ? '#18241e' : colors[0], borderWidth: isDoughnut ? 3 : 0, borderRadius: isDoughnut ? 0 : 3, maxBarThickness: 28 }] },
+		data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: isDoughnut ? colors : colors[0], borderColor: isDoughnut ? '#18221c' : colors[0], borderWidth: isDoughnut ? 3 : 0, borderRadius: isDoughnut ? 0 : 3, maxBarThickness: 28 }] },
 		options: isDoughnut ? {
 			responsive: true,
 			maintainAspectRatio: false,
 			cutout: '68%',
-			plugins: { legend: { position: 'bottom', labels: { color: '#c6ccc4', usePointStyle: true, pointStyle: 'circle', padding: 18, boxWidth: 8 } }, tooltip: chartOptions().plugins.tooltip }
+			plugins: { legend: { position: 'bottom', labels: { color: '#d0d0c4', usePointStyle: true, pointStyle: 'circle', padding: 18, boxWidth: 8 } }, tooltip: chartOptions().plugins.tooltip }
 		} : chartOptions(options)
 	}));
 }

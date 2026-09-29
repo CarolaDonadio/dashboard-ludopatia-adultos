@@ -1,18 +1,18 @@
 :root {
   color-scheme: dark;
-  --bg: #121b17;
-  --surface: #19251e;
-  --surface-raised: #202c24;
-  --surface-soft: #243128;
-  --line: #344337;
-  --line-soft: rgba(198, 183, 132, .16);
-  --text: #f4f0e5;
-  --text-soft: #c4c6b9;
-  --muted: #98a397;
-  --gold: #d5b56a;
-  --gold-strong: #edcd7e;
-  --green: #71a889;
-  --red: #d4846e;
+  --bg: #101713;
+  --surface: #18221c;
+  --surface-raised: #202b23;
+  --surface-soft: #29372d;
+  --line: #405044;
+  --line-soft: rgba(217, 174, 77, .2);
+  --text: #f7f1df;
+  --text-soft: #d0d0c4;
+  --muted: #a0aa9f;
+  --gold: #d9ae4d;
+  --gold-strong: #f0cb71;
+  --green: #4d9b70;
+  --red: #d95650;
   --serif: 'Playfair Display', Georgia, serif;
   --sans: 'DM Sans', 'Segoe UI', sans-serif;
 }
