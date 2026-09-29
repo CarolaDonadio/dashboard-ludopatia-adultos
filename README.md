@@ -18,20 +18,20 @@ Mientras `firebase-config.js` tenga valores de ejemplo, las respuestas se guarda
 
 ## Crear y conectar Firestore
 
-Firestore es una base documental: no hace falta crear una tabla ni una colección manualmente. Al enviar la primera encuesta, `addDoc` crea `respuestas_encuesta` y un documento nuevo con ID automático.
+Firestore es una base documental: no hace falta crear una tabla ni una colección de respuestas manualmente. Al enviar la primera encuesta, `addDoc` crea `respuestas_encuesta` y un documento nuevo con ID automático.
 
 1. En Firebase Console, creá un proyecto o abrí el existente.
 2. En **Configuración del proyecto > General**, registrá una aplicación web. Copiá su objeto `firebaseConfig` en `public/js/firebase-config.js`, reemplazando `apiKey`, `authDomain`, `projectId`, `messagingSenderId` y `appId`.
 3. En **Compilación > Firestore Database**, elegí **Crear base de datos** y **modo de producción**. Elegí con cuidado la ubicación/región: Firestore no permite cambiarla después de crear la base.
-4. En la pestaña **Reglas**, pegá el contenido de `firestore.rules` y publicalo. Las reglas permiten crear respuestas anónimas con campos y ramas esperadas; solo una sesión con el custom claim `admin: true` puede leer respuestas. Actualizar y borrar desde el cliente está bloqueado.
-5. Habilitá **Authentication > Proveedores de acceso > Correo electrónico/contraseña** y creá la cuenta administrativa.
-6. Asigná `admin: true` a esa cuenta desde un entorno confiable usando Firebase Admin SDK. Crear el usuario en Authentication no asigna el rol. Nunca pongas una clave de servicio ni Admin SDK en `public/` o en el navegador.
+4. En la pestaña **Reglas**, pegá el contenido de `firestore.secure.rules` y publicalo. Firebase Hosting también está configurado para usar ese archivo. Las reglas permiten crear respuestas anónimas validadas y limitan la lectura a administradores registrados.
+5. Habilitá **Authentication > Proveedores de acceso > Correo electrónico/contraseña** y creá la cuenta que administrará el dashboard.
+6. En **Firestore > Datos**, creá la colección `administradores`. Creá un documento cuyo **ID sea exactamente el UID** del usuario que aparece en Authentication. Podés agregar el campo `rol` de tipo string con valor `admin` como referencia; la app autoriza por la existencia del documento. La interfaz pública del sitio no puede crear ni modificar estos documentos.
 7. Agregá a Authentication los dominios donde se publica el sitio, incluidos los dominios de producción de Vercel y el dominio personalizado si existe.
-8. Cuando esté publicada la web, enviá una respuesta de prueba. Debe aparecer `respuestas_encuesta` en **Firestore > Datos**. Iniciá sesión con la cuenta administradora para que `/dashboard` lea esos documentos.
+8. Cuando esté publicada la web, enviá una respuesta de prueba. Debe aparecer `respuestas_encuesta` en **Firestore > Datos**. Iniciá sesión con el usuario cuyo UID registraste en `administradores` para que `/dashboard` lea esos documentos.
 
 La colección usada es `respuestas_encuesta`; cada documento incluye `fechaEnvio` (timestamp del servidor), respuestas de texto y arreglos para preguntas múltiples. Las respuestas omitidas por ramificación no se guardan como campos vacíos. Los valores “Otro” se guardan junto a la opción (por ejemplo, `Otro: respuesta`). El panel consulta por `fechaEnvio` y calcula sus KPI y gráficos en el navegador; la consulta de un solo campo no necesita índice compuesto.
 
-La configuración Firebase web identifica el proyecto, pero no es una contraseña. La protección de los datos depende de las reglas publicadas y del claim administrativo. Antes de recolectar respuestas reales, revisá cuotas, privacidad/consentimiento, App Check y protección contra envíos abusivos.
+La configuración Firebase web identifica el proyecto, pero no es una contraseña. La protección de los datos depende de las reglas publicadas y de los documentos de autorización en `administradores`. Antes de recolectar respuestas reales, revisá cuotas, privacidad/consentimiento, App Check y protección contra envíos abusivos.
 
 ## Métricas
 
@@ -41,4 +41,4 @@ Los datos de demostración son inventados. No deben interpretarse como resultado
 
 ## Despliegue
 
-El proyecto incluye `vercel.json` para sus rutas en Vercel. En Firebase Hosting, `firebase.json` publica `public` y enlaza `firestore.rules`. Los módulos de Firebase y Chart.js se cargan desde CDN; los sitios deben servirse por HTTPS.
+El proyecto incluye `vercel.json` para sus rutas en Vercel. En Firebase Hosting, `firebase.json` publica `public` y enlaza `firestore.secure.rules`. Los módulos de Firebase y Chart.js se cargan desde CDN; los sitios deben servirse por HTTPS.

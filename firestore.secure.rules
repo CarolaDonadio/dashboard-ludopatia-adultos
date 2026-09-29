@@ -2,7 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth != null
+        && exists(/databases/$(database)/documents/administradores/$(request.auth.uid));
+    }
+
+    match /administradores/{adminUid} {
+      allow get: if request.auth != null && request.auth.uid == adminUid;
+      allow list, create, update, delete: if false;
     }
 
     match /respuestas_encuesta/{responseId} {
