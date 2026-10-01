@@ -3,6 +3,7 @@
 .dashboard-title-row h1 { margin: 0; font-family: var(--serif); font-size: clamp(29px, 3.4vw, 42px); font-weight: 600; line-height: 1.2; }
 .dashboard-subtitle { margin: 8px 0 0; color: var(--text-soft); font-size: 13px; }
 .dashboard-meta { display: flex; flex-direction: column; align-items: end; gap: 8px; white-space: nowrap; }
+.dashboard-export { min-height: 38px; gap: 8px; padding: 0 14px; font-size: 12px; }
 .data-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; color: var(--text-soft); border: 1px solid var(--line); font-size: 10px; }
 .data-badge::before { width: 6px; height: 6px; content: ''; background: var(--green); border-radius: 50%; }
 .dashboard-shell > .notice { margin-bottom: 16px; }

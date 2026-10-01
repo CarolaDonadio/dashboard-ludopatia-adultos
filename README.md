@@ -9,6 +9,7 @@ Encuesta anónima para personas adultas y dashboard descriptivo. Sitio estático
 - `/login` autentica al equipo administrador con Firebase Authentication.
 - `/dashboard` muestra respuestas locales si Firebase aún no está configurado o datos de Firestore con sesión válida.
 - `/dashboard?demo=1` muestra datos sintéticos, siempre identificados como demostración.
+- El botón **Descargar Excel** exporta indicadores, distribuciones y respuestas en un archivo `.xlsx`.
 
 ## Desarrollo local
 
@@ -39,4 +40,4 @@ Los datos de demostración son inventados. No deben interpretarse como resultado
 
 ## Despliegue
 
-El proyecto incluye `vercel.json` para sus rutas en Vercel. En Firebase Hosting, `firebase.json` publica `public` y enlaza `firestore.secure.rules`. Los módulos de Firebase y Chart.js se cargan desde CDN; los sitios deben servirse por HTTPS.
+El proyecto incluye `vercel.json` para sus rutas en Vercel. En Firebase Hosting, `firebase.json` publica `public` y enlaza `firestore.secure.rules`. Los módulos de Firebase, Chart.js y SheetJS se cargan desde CDN; los sitios deben servirse por HTTPS.

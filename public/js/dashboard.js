@@ -4,6 +4,7 @@ import { getSurveyResponses, isFirebaseConfigured, isFirebasePartiallyConfigured
 const colors = ['#d9ae4d', '#d95650', '#4d9b70', '#e5d9b7', '#c77a47', '#75b5a0', '#aeb7ad', '#9b7b50'];
 const demoMode = new URLSearchParams(location.search).get('demo') === '1';
 const chartInstances = [];
+let dashboardRecords = [];
 
 function makeDemoRecords() {
 	const gambling = ['Sí, actualmente', 'Sí, actualmente', 'Sí, pero actualmente no', 'No, nunca', 'No, nunca', 'Sí, actualmente', 'Sí, pero actualmente no'];
@@ -120,7 +121,79 @@ function renderTable(records, metrics) {
 	body.innerHTML = rows.map(([label, count]) => `<tr><th scope="row">${label}</th><td>${formatNumber(count)}</td><td>${percentText(percentage(count, metrics.denominators.experienced))}</td></tr>`).join('');
 }
 
+function exportDashboard(XLSX, records) {
+	const metrics = calculateMetrics(records);
+	const indicatorRows = [
+		['Indicador', 'Valor', 'Base válida'],
+		['Respuestas recibidas', metrics.total, metrics.denominators.total],
+		['Apuestas actualmente', percentText(metrics.activeRate), metrics.denominators.total],
+		['Experiencia con apuestas', percentText(metrics.experienceRate), metrics.denominators.total],
+		['Uso de deuda o crédito', percentText(metrics.debtRate), metrics.denominators.debt],
+		['Excedió el monto previsto', percentText(metrics.overspendRate), metrics.denominators.overspend],
+		['Reportó algún impacto', percentText(metrics.impactRate), metrics.denominators.impact],
+		['Interés en capacitación', percentText(metrics.trainingInterestRate), metrics.denominators.interest],
+		['Monto mensual más frecuente', metrics.topSpend || 'Sin datos', metrics.denominators.spend]
+	];
+	const distributions = [
+		['Relación con las apuestas', metrics.gamblingStates],
+		['Edades', metrics.ages],
+		['Ritmo de apuestas', metrics.frequency],
+		['Ámbitos afectados', metrics.impacts.filter(([label]) => label !== 'Ninguno')],
+		['Temas de interés', metrics.trainingTopics],
+		['Riesgos económicos', metrics.awareness],
+		['Tipos de apuestas', metrics.betTypes],
+		['Motivos para apostar', metrics.bettingMotives],
+		['Fuentes de financiamiento', metrics.fundingSources],
+		['Intentos de reducir o dejar', metrics.reductionAttempts],
+		['Resultado de la reducción', metrics.reductionOutcomes],
+		['Conocimiento financiero', metrics.financialEducation],
+		['Educación financiera previa', metrics.financialEducationHistory],
+		['Exposición a publicidad', metrics.advertising],
+		['Conocimiento de legalidad', metrics.legalKnowledge],
+		['Motivos para no apostar', metrics.neverBetReasons]
+	];
+	const distributionRows = [['Dimensión', 'Categoría', 'Respuestas', 'Porcentaje (%)']];
+	distributions.forEach(([dimension, rows]) => {
+		rows.forEach(([label, count]) => distributionRows.push([dimension, label, count, '']));
+	});
+	metrics.neverBetPerceptions.forEach(([label, value]) => {
+		distributionRows.push(['Percepción de riesgos entre quienes nunca apostaron', label, '', value ?? 'Sin datos']);
+	});
+
+	const spendCounts = new Map();
+	records.forEach(record => {
+		if (record.realiza_apuestas === 'No, nunca') return;
+		const value = record.monto_mensual;
+		if (typeof value !== 'string' || !value.trim()) return;
+		spendCounts.set(value, (spendCounts.get(value) || 0) + 1);
+	});
+	[...spendCounts.entries()].sort((first, second) => second[1] - first[1]).forEach(([label, count]) => {
+		distributionRows.push(['Monto destinado', label, count, percentage(count, metrics.denominators.experienced) ?? 'Sin datos']);
+	});
+
+	const responseHeaders = [...new Set(records.flatMap(record => Object.keys(record)))];
+	const responseRows = [
+		responseHeaders,
+		...records.map(record => responseHeaders.map(header => {
+			const value = record[header];
+			if (value instanceof Date) return value.toISOString();
+			if (Array.isArray(value)) return value.join(', ');
+			if (value && typeof value.toDate === 'function') return value.toDate().toISOString();
+			if (value && typeof value === 'object') return JSON.stringify(value);
+			return value ?? '';
+		}))
+	];
+
+	const workbook = XLSX.utils.book_new();
+	XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(indicatorRows), 'Indicadores');
+	XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(distributionRows), 'Distribuciones');
+	XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(responseRows), 'Respuestas');
+	XLSX.writeFile(workbook, `dashboard-ludostats-${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
 async function render(records, Chart) {
+	dashboardRecords = records;
+	document.querySelector('#export-button').disabled = records.length === 0;
 	const metrics = calculateMetrics(records);
 	renderKpis(metrics);
 	drawChart(Chart, 'gambling-chart', { labels: metrics.gamblingStates.map(item => item[0]), values: metrics.gamblingStates.map(item => item[1]) }, 'doughnut');
@@ -151,7 +224,23 @@ async function initialize() {
 	const localNotice = document.querySelector('#local-notice');
 	const badge = document.querySelector('#data-badge');
 	const logout = document.querySelector('#logout-button');
+	const exportButton = document.querySelector('#export-button');
 	const { default: Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.7/auto/+esm');
+
+	exportButton.addEventListener('click', async () => {
+		exportButton.disabled = true;
+		try {
+			const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
+			exportDashboard(XLSX, dashboardRecords);
+		} catch (error) {
+			const message = document.querySelector('#dashboard-error');
+			message.textContent = 'No fue posible exportar los datos a Excel. Verificá tu conexión e intentá nuevamente.';
+			message.hidden = false;
+			console.error('No se pudieron exportar los datos del dashboard:', error);
+		} finally {
+			exportButton.disabled = dashboardRecords.length === 0;
+		}
+	});
 
 	if (demoMode) {
 		demoNotice.hidden = false;
