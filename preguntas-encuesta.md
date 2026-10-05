@@ -11,7 +11,7 @@
 
 2. **¿Qué carrera estás cursando?**
    - [ ] Administración Financiera
-   - [ ] Base de Datos e Inteligencia Artificial
+   - [ ] Ciencia de Datos e Inteligencia Artificial
    - [ ] Profesorado de Educación Inicial
    - [ ] Profesorado de Inglés
    - [ ] Profesorado de Matemática

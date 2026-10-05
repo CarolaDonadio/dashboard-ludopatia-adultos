@@ -1,7 +1,7 @@
 import { saveSurveyResponse } from './firebase-config.js';
 
 const optionSets = {
-  carrera: ['Administración Financiera', 'Base de Datos e Inteligencia Artificial', 'Profesorado de Educación Inicial', 'Profesorado de Inglés', 'Profesorado de Matemática', 'Profesorado en Lengua y Literatura', 'Curso de Formación Básica de Inglés', 'Enfermería', 'Trabajo Social', 'Seguridad e Higiene', 'Otra'],
+  carrera: ['Administración Financiera', 'Ciencia de Datos e Inteligencia Artificial', 'Profesorado de Educación Inicial', 'Profesorado de Inglés', 'Profesorado de Matemática', 'Profesorado en Lengua y Literatura', 'Curso de Formación Básica de Inglés', 'Enfermería', 'Trabajo Social', 'Seguridad e Higiene', 'Otra'],
   genero: ['Femenino', 'Masculino', 'Otro'],
   situacion_laboral: ['Trabajo en relación de dependencia', 'Trabajo por cuenta propia', 'Trabajo y estudio', 'No trabajo actualmente', 'Otra situación'],
   dependencia_economica: ['Sí', 'No', 'Parcialmente'],
